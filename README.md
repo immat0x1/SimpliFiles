@@ -1,10 +1,25 @@
 # SimpliFiles
 
-Safe ZIP archive utilities for Java and Kotlin.
+Safe and convenient file toolkit for Java and Kotlin, with archive-first APIs.
 
 ## Installation
 
-Not published yet.
+Snapshot builds are available from Maven Central Snapshots:
+
+```kotlin
+repositories {
+    maven {
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        content {
+            includeModule("io.github.immat0x1", "simplifiles")
+        }
+    }
+}
+
+dependencies {
+    implementation("io.github.immat0x1:simplifiles:0.1.0-SNAPSHOT")
+}
+```
 
 Planned Maven coordinate:
 
@@ -16,7 +31,7 @@ implementation("io.github.immat0x1:simplifiles:0.1.0")
 
 - Java 17+
 - Kotlin/JVM
-- ZIP archives only
+- Archive module supports ZIP archives
 
 ## Kotlin
 
@@ -36,6 +51,19 @@ SimpliFiles.archive("app.zip")
         archive.find("**/*.tmp").forEach { it.delete() }
         archive.saveAsZip("cleaned.zip")
     }
+```
+
+```kotlin
+val packDir = SimpliFiles.directory("icon-pack").create()
+
+packDir.file("metadata.json")
+    .writeTextAtomic("""{"schemaVersion":1}""")
+
+packDir.file("icons/edit.svg")
+    .writeText("<svg/>")
+
+val metadata = packDir.file("metadata.json").readText()
+val iconFiles = packDir.directory("icons").walkFiles()
 ```
 
 ## Java
@@ -91,6 +119,10 @@ if (report.isSafe()) {
 
 ## Features
 
+- Regular file read, write, append, copy, move, delete
+- Atomic text and byte writes
+- Directory create, list, walk, copy, move, recursive delete
+- Safe child path resolution inside a directory root
 - ZIP inspection without extraction
 - ZIP validation report
 - Dry-run extraction plans
@@ -100,8 +132,6 @@ if (report.isSafe()) {
 - Extraction cancellation tokens
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
-- File APIs: read, write, append, copy, move, delete
-- Directory APIs: create, list, copy, move, recursive delete
 - Glob search for extracted files
 - Save modified extracted contents back to ZIP
 
@@ -137,7 +167,7 @@ Core exception types:
 
 ## Limitations
 
-- ZIP only
+- Archive module supports ZIP only
 - symlink and hardlink handling is not complete yet
 - benchmark coverage is basic
 

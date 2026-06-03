@@ -1,6 +1,8 @@
 package org.simplifiles
 
 import org.simplifiles.archive.ArchiveSource
+import org.simplifiles.files.SimpliDirectory
+import org.simplifiles.files.SimpliFile
 import java.io.File
 import java.nio.file.Path
 
@@ -25,4 +27,40 @@ object SimpliFiles {
      */
     @JvmStatic
     fun archive(file: File): ArchiveSource = archive(file.toPath())
+
+    /**
+     * Creates a file handle from a filesystem path.
+     */
+    @JvmStatic
+    fun file(path: Path): SimpliFile = SimpliFile(path)
+
+    /**
+     * Creates a file handle from a path string.
+     */
+    @JvmStatic
+    fun file(path: String): SimpliFile = file(Path.of(path))
+
+    /**
+     * Creates a file handle from a Java [File].
+     */
+    @JvmStatic
+    fun file(file: File): SimpliFile = file(file.toPath())
+
+    /**
+     * Creates a directory handle from a filesystem path.
+     */
+    @JvmStatic
+    fun directory(path: Path): SimpliDirectory = SimpliDirectory(path)
+
+    /**
+     * Creates a directory handle from a path string.
+     */
+    @JvmStatic
+    fun directory(path: String): SimpliDirectory = directory(Path.of(path))
+
+    /**
+     * Creates a directory handle from a Java [File].
+     */
+    @JvmStatic
+    fun directory(file: File): SimpliDirectory = directory(file.toPath())
 }

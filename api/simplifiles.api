@@ -3,6 +3,12 @@ public final class org/simplifiles/SimpliFiles {
 	public static final fun archive (Ljava/io/File;)Lorg/simplifiles/archive/ArchiveSource;
 	public static final fun archive (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveSource;
 	public static final fun archive (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchiveSource;
+	public static final fun directory (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public static final fun directory (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public static final fun directory (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public static final fun file (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public static final fun file (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public static final fun file (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/archive/ArchiveDirectory {
@@ -447,6 +453,10 @@ public final class org/simplifiles/exception/ExtractionTargetException : org/sim
 	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;)V
 }
 
+public final class org/simplifiles/exception/FileOperationException : org/simplifiles/exception/SimpliFilesException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
 public class org/simplifiles/exception/SimpliFilesException : java/io/IOException {
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
@@ -456,7 +466,63 @@ public final class org/simplifiles/exception/UnsafeArchivePathException : org/si
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 }
 
+public final class org/simplifiles/exception/UnsafePathException : org/simplifiles/exception/SimpliFilesException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+}
+
 public final class org/simplifiles/exception/UnsupportedArchiveFormatException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/nio/file/Path;)V
+}
+
+public final class org/simplifiles/files/SimpliDirectory {
+	public final fun contains (Ljava/nio/file/Path;)Z
+	public final fun copyTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun copyTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun create ()Lorg/simplifiles/files/SimpliDirectory;
+	public final fun deleteRecursively ()Z
+	public final fun directory (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun exists ()Z
+	public final fun file (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun getDirectories ()Ljava/util/List;
+	public final fun getExists ()Z
+	public final fun getFiles ()Ljava/util/List;
+	public final fun getPath ()Ljava/nio/file/Path;
+	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun moveTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun walkFiles ()Ljava/util/List;
+}
+
+public final class org/simplifiles/files/SimpliFile {
+	public final fun appendText (Ljava/lang/String;)V
+	public final fun appendText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
+	public static synthetic fun appendText$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
+	public final fun copyTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun copyTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun delete ()Z
+	public final fun exists ()Z
+	public final fun getExists ()Z
+	public final fun getExtension ()Ljava/lang/String;
+	public final fun getPath ()Ljava/nio/file/Path;
+	public final fun getSize ()J
+	public final fun inputStream ()Ljava/io/InputStream;
+	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun moveTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun outputStream ()Ljava/io/OutputStream;
+	public final fun readBytes ()[B
+	public final fun readText ()Ljava/lang/String;
+	public final fun readText (Ljava/nio/charset/Charset;)Ljava/lang/String;
+	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun writeBytes ([B)V
+	public final fun writeBytesAtomic ([B)V
+	public final fun writeText (Ljava/lang/String;)V
+	public final fun writeText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
+	public static synthetic fun writeText$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
+	public final fun writeTextAtomic (Ljava/lang/String;)V
+	public final fun writeTextAtomic (Ljava/lang/String;Ljava/nio/charset/Charset;)V
+	public static synthetic fun writeTextAtomic$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
 }
 
