@@ -2,6 +2,7 @@
 .kotlin/
 build/
 out/
+docs/
 
 *.class
 *.jar
