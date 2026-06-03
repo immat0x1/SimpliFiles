@@ -23,6 +23,7 @@ class SimpliDirectoryTest {
         root.directory("icons").create()
         root.file("icons/edit.svg").writeText("<svg/>")
 
+        assertEquals(tempDir.resolve("icons/edit.svg"), root.resolveInside("icons/edit.svg"))
         assertEquals(listOf("metadata.json"), root.files.map { it.path.fileName.toString() })
         assertEquals(listOf("icons"), root.directories.map { it.path.fileName.toString() })
         assertEquals(
@@ -63,6 +64,32 @@ class SimpliDirectoryTest {
 
         assertTrue(moved.deleteRecursively())
         assertFalse(moved.exists)
+    }
+
+    @Test
+    fun `directory copy and move support overwrite policies`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("file.txt").writeText("new")
+        val target = SimpliFiles.directory(tempDir.resolve("target")).create()
+        target.file("file.txt").writeText("old")
+        target.file("stale.txt").writeText("stale")
+
+        assertFailsWith<FileOperationException> {
+            source.copyTo(target.path, OverwritePolicy.ERROR)
+        }
+
+        source.copyTo(target.path, OverwritePolicy.SKIP)
+        assertEquals("old", target.file("file.txt").readText())
+
+        source.copyTo(target.path, OverwritePolicy.REPLACE)
+        assertEquals("new", target.file("file.txt").readText())
+        assertFalse(target.file("stale.txt").exists)
+
+        val moveSource = SimpliFiles.directory(tempDir.resolve("move-source")).create()
+        moveSource.file("file.txt").writeText("moved")
+        moveSource.moveTo(target.path, OverwritePolicy.SKIP)
+        assertTrue(moveSource.exists)
+        assertEquals("new", target.file("file.txt").readText())
     }
 
     @Test

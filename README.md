@@ -38,6 +38,7 @@ implementation("io.github.immat0x1:simplifiles:0.1.0")
 ```kotlin
 import org.simplifiles.SimpliFiles
 import org.simplifiles.archive.security.SecurityPolicy
+import org.simplifiles.files.OverwritePolicy
 
 SimpliFiles.archive("app.zip")
     .withPolicy(SecurityPolicy.strict())
@@ -64,6 +65,10 @@ packDir.file("icons/edit.svg")
 
 val metadata = packDir.file("metadata.json").readText()
 val iconFiles = packDir.directory("icons").walkFiles()
+
+val safeIconPath = packDir.resolveInside("icons/edit.svg")
+val smallMetadata = packDir.file("metadata.json").readText(maxBytes = 64 * 1024)
+packDir.file("metadata.json").copyTo(packDir.resolveInside("backup/metadata.json"), OverwritePolicy.ERROR)
 ```
 
 ## Java
@@ -120,9 +125,11 @@ if (report.isSafe()) {
 ## Features
 
 - Regular file read, write, append, copy, move, delete
+- Bounded file reads
 - Atomic text and byte writes
 - Directory create, list, walk, copy, move, recursive delete
 - Safe child path resolution inside a directory root
+- Copy and move overwrite policies
 - ZIP inspection without extraction
 - ZIP validation report
 - Dry-run extraction plans

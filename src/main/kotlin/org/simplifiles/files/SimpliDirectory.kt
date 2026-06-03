@@ -66,9 +66,11 @@ class SimpliDirectory internal constructor(
         return true
     }
 
-    fun file(path: String): SimpliFile = SimpliFile(SafePathResolver.resolveInside(this.path, path))
+    fun resolveInside(path: String): Path = SafePathResolver.resolveInside(this.path, path)
 
-    fun directory(path: String): SimpliDirectory = SimpliDirectory(SafePathResolver.resolveInside(this.path, path))
+    fun file(path: String): SimpliFile = SimpliFile(resolveInside(path))
+
+    fun directory(path: String): SimpliDirectory = SimpliDirectory(resolveInside(path))
 
     fun contains(target: Path): Boolean {
         val root = path.toAbsolutePath().normalize()
@@ -89,9 +91,22 @@ class SimpliDirectory internal constructor(
         }
     }
 
-    fun copyTo(target: Path): SimpliDirectory {
+    fun copyTo(target: Path): SimpliDirectory = copyTo(target, OverwritePolicy.REPLACE)
+
+    fun copyTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory {
         if (target.toAbsolutePath().normalize().startsWith(path.toAbsolutePath().normalize())) {
             throw FileOperationException("Directory cannot be copied into itself: $target")
+        }
+
+        if (Files.exists(target)) {
+            when (overwritePolicy) {
+                OverwritePolicy.ERROR -> throw FileOperationException("Target already exists: $target")
+                OverwritePolicy.SKIP -> return SimpliDirectory(target)
+                OverwritePolicy.REPLACE -> FileTreeCleaner.deleteRecursively(target)
+            }
         }
 
         FileTreeCopier.copyDirectory(path, target)
@@ -100,11 +115,34 @@ class SimpliDirectory internal constructor(
 
     fun copyTo(target: String): SimpliDirectory = copyTo(Path.of(target))
 
+    fun copyTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = copyTo(Path.of(target), overwritePolicy)
+
     fun copyTo(target: File): SimpliDirectory = copyTo(target.toPath())
 
-    fun moveTo(target: Path): SimpliDirectory {
+    fun copyTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = copyTo(target.toPath(), overwritePolicy)
+
+    fun moveTo(target: Path): SimpliDirectory = moveTo(target, OverwritePolicy.REPLACE)
+
+    fun moveTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory {
         if (target.toAbsolutePath().normalize().startsWith(path.toAbsolutePath().normalize())) {
             throw FileOperationException("Directory cannot be moved into itself: $target")
+        }
+
+        if (Files.exists(target)) {
+            when (overwritePolicy) {
+                OverwritePolicy.ERROR -> throw FileOperationException("Target already exists: $target")
+                OverwritePolicy.SKIP -> return SimpliDirectory(target)
+                OverwritePolicy.REPLACE -> FileTreeCleaner.deleteRecursively(target)
+            }
         }
 
         target.parent?.let(Files::createDirectories)
@@ -114,6 +152,15 @@ class SimpliDirectory internal constructor(
 
     fun moveTo(target: String): SimpliDirectory = moveTo(Path.of(target))
 
+    fun moveTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = moveTo(Path.of(target), overwritePolicy)
+
     fun moveTo(target: File): SimpliDirectory = moveTo(target.toPath())
 
+    fun moveTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = moveTo(target.toPath(), overwritePolicy)
 }

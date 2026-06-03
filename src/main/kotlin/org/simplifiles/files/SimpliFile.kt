@@ -44,8 +44,22 @@ class SimpliFile internal constructor(
 
     fun readBytes(): ByteArray = Files.readAllBytes(path)
 
+    fun readBytes(maxBytes: Long): ByteArray {
+        require(maxBytes >= 0) { "maxBytes must not be negative." }
+        if (Files.size(path) > maxBytes) {
+            throw FileOperationException("File exceeds read limit of $maxBytes bytes: $path")
+        }
+        return readBytes()
+    }
+
     @JvmOverloads
     fun readText(charset: Charset = Charsets.UTF_8): String = Files.readString(path, charset)
+
+    @JvmOverloads
+    fun readText(
+        maxBytes: Long,
+        charset: Charset = Charsets.UTF_8,
+    ): String = readBytes(maxBytes).toString(charset)
 
     fun writeBytes(bytes: ByteArray) {
         path.parent?.let(Files::createDirectories)
@@ -119,23 +133,81 @@ class SimpliFile internal constructor(
 
     fun delete(): Boolean = Files.deleteIfExists(path)
 
-    fun copyTo(target: Path): SimpliFile {
+    fun copyTo(target: Path): SimpliFile = copyTo(target, OverwritePolicy.REPLACE)
+
+    fun copyTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile {
         target.parent?.let(Files::createDirectories)
-        Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING)
+        when (overwritePolicy) {
+            OverwritePolicy.ERROR -> {
+                if (Files.exists(target)) {
+                    throw FileOperationException("Target already exists: $target")
+                }
+                Files.copy(path, target)
+            }
+
+            OverwritePolicy.REPLACE -> Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING)
+            OverwritePolicy.SKIP -> {
+                if (!Files.exists(target)) {
+                    Files.copy(path, target)
+                }
+            }
+        }
         return SimpliFile(target)
     }
 
     fun copyTo(target: String): SimpliFile = copyTo(Path.of(target))
 
+    fun copyTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = copyTo(Path.of(target), overwritePolicy)
+
     fun copyTo(target: File): SimpliFile = copyTo(target.toPath())
 
-    fun moveTo(target: Path): SimpliFile {
+    fun copyTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = copyTo(target.toPath(), overwritePolicy)
+
+    fun moveTo(target: Path): SimpliFile = moveTo(target, OverwritePolicy.REPLACE)
+
+    fun moveTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile {
         target.parent?.let(Files::createDirectories)
-        Files.move(path, target, StandardCopyOption.REPLACE_EXISTING)
+        when (overwritePolicy) {
+            OverwritePolicy.ERROR -> {
+                if (Files.exists(target)) {
+                    throw FileOperationException("Target already exists: $target")
+                }
+                Files.move(path, target)
+            }
+
+            OverwritePolicy.REPLACE -> Files.move(path, target, StandardCopyOption.REPLACE_EXISTING)
+            OverwritePolicy.SKIP -> {
+                if (!Files.exists(target)) {
+                    Files.move(path, target)
+                }
+            }
+        }
         return SimpliFile(target)
     }
 
     fun moveTo(target: String): SimpliFile = moveTo(Path.of(target))
 
+    fun moveTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = moveTo(Path.of(target), overwritePolicy)
+
     fun moveTo(target: File): SimpliFile = moveTo(target.toPath())
+
+    fun moveTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = moveTo(target.toPath(), overwritePolicy)
 }

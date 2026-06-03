@@ -474,11 +474,23 @@ public final class org/simplifiles/exception/UnsupportedArchiveFormatException :
 	public fun <init> (Ljava/nio/file/Path;)V
 }
 
+public final class org/simplifiles/files/OverwritePolicy : java/lang/Enum {
+	public static final field ERROR Lorg/simplifiles/files/OverwritePolicy;
+	public static final field REPLACE Lorg/simplifiles/files/OverwritePolicy;
+	public static final field SKIP Lorg/simplifiles/files/OverwritePolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/files/OverwritePolicy;
+	public static fun values ()[Lorg/simplifiles/files/OverwritePolicy;
+}
+
 public final class org/simplifiles/files/SimpliDirectory {
 	public final fun contains (Ljava/nio/file/Path;)Z
 	public final fun copyTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun copyTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun copyTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun copyTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun copyTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun create ()Lorg/simplifiles/files/SimpliDirectory;
 	public final fun deleteRecursively ()Z
 	public final fun directory (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
@@ -489,8 +501,12 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun getFiles ()Ljava/util/List;
 	public final fun getPath ()Ljava/nio/file/Path;
 	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun moveTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun moveTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun moveTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun moveTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun resolveInside (Ljava/lang/String;)Ljava/nio/file/Path;
 	public final fun walkFiles ()Ljava/util/List;
 }
 
@@ -499,8 +515,11 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun appendText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
 	public static synthetic fun appendText$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
 	public final fun copyTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun copyTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun copyTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun copyTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun copyTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun delete ()Z
 	public final fun exists ()Z
 	public final fun getExists ()Z
@@ -509,12 +528,19 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun getSize ()J
 	public final fun inputStream ()Ljava/io/InputStream;
 	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun moveTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun moveTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun moveTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun moveTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun outputStream ()Ljava/io/OutputStream;
 	public final fun readBytes ()[B
+	public final fun readBytes (J)[B
 	public final fun readText ()Ljava/lang/String;
+	public final fun readText (J)Ljava/lang/String;
+	public final fun readText (JLjava/nio/charset/Charset;)Ljava/lang/String;
 	public final fun readText (Ljava/nio/charset/Charset;)Ljava/lang/String;
+	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun writeBytes ([B)V
 	public final fun writeBytesAtomic ([B)V
