@@ -150,7 +150,7 @@ mavenPublishing {
     pom {
         name.set("SimpliFiles")
         description.set("Safe and convenient file and archive toolkit for Java and Kotlin.")
-        url.set("https://github.com/immat0x1/simplifiles")
+        url.set("https://github.com/immat0x1/SimpliFiles")
 
         licenses {
             license {
@@ -167,14 +167,14 @@ mavenPublishing {
         }
 
         scm {
-            connection.set("scm:git:https://github.com/immat0x1/simplifiles.git")
-            developerConnection.set("scm:git:ssh://git@github.com/immat0x1/simplifiles.git")
-            url.set("https://github.com/immat0x1/simplifiles")
+            connection.set("scm:git:https://github.com/immat0x1/SimpliFiles.git")
+            developerConnection.set("scm:git:ssh://git@github.com/immat0x1/SimpliFiles.git")
+            url.set("https://github.com/immat0x1/SimpliFiles")
         }
 
         issueManagement {
             system.set("GitHub Issues")
-            url.set("https://github.com/immat0x1/simplifiles/issues")
+            url.set("https://github.com/immat0x1/SimpliFiles/issues")
         }
     }
 }
