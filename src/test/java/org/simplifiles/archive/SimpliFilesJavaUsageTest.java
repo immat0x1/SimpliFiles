@@ -2,7 +2,7 @@ package org.simplifiles.archive;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.simplifiles.Simplifiles;
+import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.security.DuplicatePolicy;
 import org.simplifiles.archive.security.SecurityPolicy;
 
@@ -17,7 +17,7 @@ import java.util.zip.ZipOutputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SimplifilesJavaUsageTest {
+class SimpliFilesJavaUsageTest {
     @TempDir
     Path tempDir;
 
@@ -41,13 +41,13 @@ class SimplifilesJavaUsageTest {
                 .bufferSize(16 * 1024)
                 .build();
 
-        ValidationReport report = Simplifiles.archive(zip)
+        ValidationReport report = SimpliFiles.archive(zip)
                 .withPolicy(policy)
                 .validate();
 
         assertTrue(report.isSafe());
 
-        ArchiveExtractionPlan plan = Simplifiles.archive(zip)
+        ArchiveExtractionPlan plan = SimpliFiles.archive(zip)
                 .withPolicy(policy)
                 .planExtractionTo(tempDir.resolve("planned-output"));
 
@@ -55,7 +55,7 @@ class SimplifilesJavaUsageTest {
         assertEquals(1, plan.getTotalEntries());
         assertEquals("config/app.yml", plan.getEntries().get(0).getNormalizedPath());
 
-        try (ExtractedArchive archive = Simplifiles.archive(zip)
+        try (ExtractedArchive archive = SimpliFiles.archive(zip)
                 .withPolicy(policy)
                 .extractToTemp(options)) {
             ArchiveFile config = archive.file("config/app.yml");
@@ -74,7 +74,7 @@ class SimplifilesJavaUsageTest {
         assertEquals(1, extractedEntries.get());
         assertEquals(4, savedEntries.get());
 
-        try (ExtractedArchive archive = Simplifiles.archive(output).extractToTemp()) {
+        try (ExtractedArchive archive = SimpliFiles.archive(output).extractToTemp()) {
             assertEquals("ok", archive.file("reports/summary.txt").readText(StandardCharsets.UTF_8));
         }
     }

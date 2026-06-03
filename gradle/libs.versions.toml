@@ -3,6 +3,7 @@ dokka = "2.2.0"
 jmh = "1.37"
 kotlin = "2.3.21"
 junit = "6.0.3"
+vanniktech = "0.36.0"
 
 [libraries]
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
@@ -15,3 +16,4 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }

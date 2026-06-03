@@ -1,7 +1,7 @@
 package org.simplifiles.archive
 
 import org.junit.jupiter.api.io.TempDir
-import org.simplifiles.Simplifiles
+import org.simplifiles.SimpliFiles
 import org.simplifiles.exception.ArchiveOperationException
 import org.simplifiles.exception.UnsafeArchivePathException
 import java.nio.file.Files
@@ -27,7 +27,7 @@ class ArchiveDirectoryTest {
             "assets/logo.txt" to "logo".toByteArray(),
         )
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             val docs = archive.directory("docs")
 
             assertTrue(docs.exists)
@@ -49,7 +49,7 @@ class ArchiveDirectoryTest {
         val zip = createZip("input/seed.txt" to "seed".toByteArray())
         val repacked = tempDir.resolve("directories.zip")
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             archive.directory("reports/daily").create()
             archive.file("reports/daily/summary.txt").writeText("summary")
             archive.file("reports/daily/details.txt").writeText("details")
@@ -71,7 +71,7 @@ class ArchiveDirectoryTest {
             archive.saveAsZip(repacked)
         }
 
-        Simplifiles.archive(repacked).extractToTemp().use { archive ->
+        SimpliFiles.archive(repacked).extractToTemp().use { archive ->
             assertFalse(archive.directory("reports").exists)
             assertEquals("summary", archive.file("archive/backup/reports/daily/summary.txt").readText())
             assertEquals("details", archive.file("archive/backup/reports/daily/details.txt").readText())
@@ -83,12 +83,12 @@ class ArchiveDirectoryTest {
         val zip = createZip("input/seed.txt" to "seed".toByteArray())
         val repacked = tempDir.resolve("empty-directories.zip")
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             archive.directory("empty/reports").create()
             archive.saveAsZip(repacked)
         }
 
-        Simplifiles.archive(repacked).extractToTemp().use { archive ->
+        SimpliFiles.archive(repacked).extractToTemp().use { archive ->
             assertTrue(archive.directory("empty").exists)
             assertTrue(archive.directory("empty/reports").exists)
             assertTrue(archive.directory("empty/reports").files.isEmpty())
@@ -99,7 +99,7 @@ class ArchiveDirectoryTest {
     fun `directory handle can represent missing directory`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             val missing = archive.directory("missing")
 
             assertFalse(missing.exists)
@@ -114,7 +114,7 @@ class ArchiveDirectoryTest {
     fun `directory rejects paths outside archive root`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<UnsafeArchivePathException> {
                 archive.directory("../outside")
             }
@@ -125,7 +125,7 @@ class ArchiveDirectoryTest {
     fun `directory copy and move reject target inside itself`() {
         val zip = createZip("docs/readme.txt" to "readme".toByteArray())
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<ArchiveOperationException> {
                 archive.directory("docs").copyTo("docs/nested")
             }

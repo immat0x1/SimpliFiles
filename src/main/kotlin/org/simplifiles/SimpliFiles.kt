@@ -5,9 +5,9 @@ import java.io.File
 import java.nio.file.Path
 
 /**
- * Public entry point for Simplifiles archive and file operations.
+ * Public entry point for SimpliFiles archive and file operations.
  */
-object Simplifiles {
+object SimpliFiles {
     /**
      * Creates an archive source from a filesystem path.
      */

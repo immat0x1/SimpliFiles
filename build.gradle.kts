@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.dokka.javadoc)
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.vanniktech.maven.publish)
     `java-library`
-    `maven-publish`
 }
 
 val projectVersion = providers.fileContents(layout.projectDirectory.file("VERSION"))
@@ -17,8 +17,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
-
-    withSourcesJar()
 }
 
 kotlin {
@@ -139,53 +137,44 @@ tasks.register<JavaExec>("jmh") {
     )
 }
 
-val dokkaJavadocJar by tasks.registering(Jar::class) {
-    description = "Assembles a Javadoc JAR containing Dokka-generated API documentation."
-    archiveClassifier.set("javadoc")
+mavenPublishing {
+    coordinates(
+        groupId = group.toString(),
+        artifactId = "simplifiles",
+        version = version.toString(),
+    )
 
-    from(tasks.dokkaGeneratePublicationJavadoc.flatMap { it.outputDirectory })
-}
+    publishToMavenCentral()
+    signAllPublications()
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-            artifact(dokkaJavadocJar)
+    pom {
+        name.set("SimpliFiles")
+        description.set("Safe and convenient file and archive toolkit for Java and Kotlin.")
+        url.set("https://github.com/immat0x1/simplifiles")
 
-            pom {
-                name.set("Simplifiles")
-                description.set("Safe and convenient file and archive toolkit for Java and Kotlin.")
-                url.set("https://github.com/immat0x1/simplifiles")
-
-                licenses {
-                    license {
-                        name.set("Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("immat0x1")
-                        name.set("immat0x1")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:https://github.com/immat0x1/simplifiles.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/immat0x1/simplifiles.git")
-                    url.set("https://github.com/immat0x1/simplifiles")
-                }
-
-                issueManagement {
-                    system.set("GitHub Issues")
-                    url.set("https://github.com/immat0x1/simplifiles/issues")
-                }
+        licenses {
+            license {
+                name.set("Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
             }
         }
-    }
-}
 
-tasks.named("assemble") {
-    dependsOn(dokkaJavadocJar)
+        developers {
+            developer {
+                id.set("immat0x1")
+                name.set("immat0x1")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:https://github.com/immat0x1/simplifiles.git")
+            developerConnection.set("scm:git:ssh://git@github.com/immat0x1/simplifiles.git")
+            url.set("https://github.com/immat0x1/simplifiles")
+        }
+
+        issueManagement {
+            system.set("GitHub Issues")
+            url.set("https://github.com/immat0x1/simplifiles/issues")
+        }
+    }
 }

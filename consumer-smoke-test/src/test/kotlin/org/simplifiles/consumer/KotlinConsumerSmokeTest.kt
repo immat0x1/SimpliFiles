@@ -1,6 +1,6 @@
 package org.simplifiles.consumer
 
-import org.simplifiles.Simplifiles
+import org.simplifiles.SimpliFiles
 import org.simplifiles.archive.security.SecurityPolicy
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,7 +19,7 @@ class KotlinConsumerSmokeTest {
 
         createZip(zip, "config/app.yml", "name: kotlin\n")
 
-        Simplifiles.archive(zip)
+        SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict())
             .extractToTemp()
             .use { archive ->
@@ -29,7 +29,7 @@ class KotlinConsumerSmokeTest {
                 archive.saveAsZip(output)
             }
 
-        Simplifiles.archive(output).extractToTemp().use { archive ->
+        SimpliFiles.archive(output).extractToTemp().use { archive ->
             assertEquals("name: kotlin\n", archive.file("reports/summary.txt").readText())
             assertTrue(archive.directory("reports").exists)
         }

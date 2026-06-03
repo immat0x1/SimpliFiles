@@ -1,4 +1,4 @@
-# Simplifiles
+# SimpliFiles
 
 Safe ZIP archive utilities for Java and Kotlin.
 
@@ -21,10 +21,10 @@ implementation("io.github.immat0x1:simplifiles:0.1.0")
 ## Kotlin
 
 ```kotlin
-import org.simplifiles.Simplifiles
+import org.simplifiles.SimpliFiles
 import org.simplifiles.archive.security.SecurityPolicy
 
-Simplifiles.archive("app.zip")
+SimpliFiles.archive("app.zip")
     .withPolicy(SecurityPolicy.strict())
     .extractToTemp()
     .use { archive ->
@@ -41,7 +41,7 @@ Simplifiles.archive("app.zip")
 ## Java
 
 ```java
-import org.simplifiles.Simplifiles;
+import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.ArchiveExtractionOptions;
 import org.simplifiles.archive.ArchiveExtractionPlan;
 import org.simplifiles.archive.ArchiveFile;
@@ -68,16 +68,16 @@ ArchiveSaveOptions saveOptions = ArchiveSaveOptions.builder()
         .bufferSize(64 * 1024)
         .build();
 
-ValidationReport report = Simplifiles.archive("app.zip")
+ValidationReport report = SimpliFiles.archive("app.zip")
         .withPolicy(policy)
         .validate();
 
 if (report.isSafe()) {
-    ArchiveExtractionPlan plan = Simplifiles.archive("app.zip")
+    ArchiveExtractionPlan plan = SimpliFiles.archive("app.zip")
             .withPolicy(policy)
             .planExtractionTo("output");
 
-    try (ExtractedArchive archive = Simplifiles.archive("app.zip")
+    try (ExtractedArchive archive = SimpliFiles.archive("app.zip")
             .withPolicy(policy)
             .extractToTemp(options)) {
         ArchiveFile config = archive.file("config/app.yml");

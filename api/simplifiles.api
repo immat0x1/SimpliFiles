@@ -1,5 +1,5 @@
-public final class org/simplifiles/Simplifiles {
-	public static final field INSTANCE Lorg/simplifiles/Simplifiles;
+public final class org/simplifiles/SimpliFiles {
+	public static final field INSTANCE Lorg/simplifiles/SimpliFiles;
 	public static final fun archive (Ljava/io/File;)Lorg/simplifiles/archive/ArchiveSource;
 	public static final fun archive (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveSource;
 	public static final fun archive (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchiveSource;
@@ -422,41 +422,41 @@ public final class org/simplifiles/archive/security/SecurityPolicy$Companion {
 	public final fun strict ()Lorg/simplifiles/archive/security/SecurityPolicy;
 }
 
-public final class org/simplifiles/exception/ArchiveOperationCanceledException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/ArchiveOperationCanceledException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> ()V
 }
 
-public final class org/simplifiles/exception/ArchiveOperationException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/ArchiveOperationException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public final class org/simplifiles/exception/ArchiveValidationException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/ArchiveValidationException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Lorg/simplifiles/archive/ValidationReport;)V
 	public final fun getReport ()Lorg/simplifiles/archive/ValidationReport;
 }
 
-public final class org/simplifiles/exception/ArchiveWriteException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/ArchiveWriteException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;)V
 }
 
-public final class org/simplifiles/exception/CorruptedArchiveException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/CorruptedArchiveException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/nio/file/Path;Ljava/lang/Throwable;)V
 }
 
-public final class org/simplifiles/exception/ExtractionTargetException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/ExtractionTargetException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;)V
 }
 
-public class org/simplifiles/exception/SimplifilesException : java/io/IOException {
+public class org/simplifiles/exception/SimpliFilesException : java/io/IOException {
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
-public final class org/simplifiles/exception/UnsafeArchivePathException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/UnsafeArchivePathException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 }
 
-public final class org/simplifiles/exception/UnsupportedArchiveFormatException : org/simplifiles/exception/SimplifilesException {
+public final class org/simplifiles/exception/UnsupportedArchiveFormatException : org/simplifiles/exception/SimpliFilesException {
 	public fun <init> (Ljava/nio/file/Path;)V
 }
 

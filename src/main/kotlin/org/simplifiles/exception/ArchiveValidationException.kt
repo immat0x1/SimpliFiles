@@ -4,6 +4,6 @@ import org.simplifiles.archive.ValidationReport
 
 class ArchiveValidationException(
     val report: ValidationReport,
-) : SimplifilesException(
+) : SimpliFilesException(
     "Archive failed validation: ${report.issues.firstOrNull()?.message ?: "unknown validation issue"}",
 )

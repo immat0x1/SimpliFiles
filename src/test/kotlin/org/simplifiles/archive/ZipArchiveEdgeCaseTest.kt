@@ -1,7 +1,7 @@
 package org.simplifiles.archive
 
 import org.junit.jupiter.api.io.TempDir
-import org.simplifiles.Simplifiles
+import org.simplifiles.SimpliFiles
 import org.simplifiles.archive.security.DuplicatePolicy
 import org.simplifiles.archive.security.SecurityPolicy
 import org.simplifiles.exception.ArchiveValidationException
@@ -25,14 +25,14 @@ class ZipArchiveEdgeCaseTest {
     fun `empty zip can be inspected validated and extracted`() {
         val zip = createZip()
 
-        val inspection = Simplifiles.archive(zip).inspect()
-        val report = Simplifiles.archive(zip).validate()
+        val inspection = SimpliFiles.archive(zip).inspect()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertEquals(ArchiveFormat.ZIP, inspection.format)
         assertEquals(0, inspection.entryCount)
         assertTrue(report.isSafe)
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertTrue(archive.files.isEmpty())
         }
     }
@@ -44,13 +44,13 @@ class ZipArchiveEdgeCaseTest {
             "dir//nested/second.txt" to "second".toByteArray(),
         )
 
-        val inspection = Simplifiles.archive(zip).inspect()
+        val inspection = SimpliFiles.archive(zip).inspect()
         assertEquals(
             listOf("dir/file.txt", "dir/nested/second.txt"),
             inspection.entries.map { it.normalizedPath },
         )
 
-        Simplifiles.archive(zip).extractToTemp().use { archive ->
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertEquals("first", archive.file("dir/file.txt").readText())
             assertEquals("second", archive.file("dir/nested/second.txt").readText())
         }
@@ -60,7 +60,7 @@ class ZipArchiveEdgeCaseTest {
     fun `validate rejects backslash parent traversal paths`() {
         val zip = createZip("..\\evil.txt" to "payload".toByteArray())
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.traversal" })
@@ -70,7 +70,7 @@ class ZipArchiveEdgeCaseTest {
     fun `validate rejects windows absolute paths`() {
         val zip = createZip("C:\\Users\\demo\\evil.txt" to "payload".toByteArray())
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.absolute" })
@@ -80,7 +80,7 @@ class ZipArchiveEdgeCaseTest {
     fun `validate rejects empty entry names`() {
         val zip = createStoredZipAllowingDuplicateNames("" to "payload".toByteArray())
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.empty" })
@@ -93,7 +93,7 @@ class ZipArchiveEdgeCaseTest {
             "conflict/nested.txt" to "nested".toByteArray(),
         )
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.conflict" })
@@ -106,7 +106,7 @@ class ZipArchiveEdgeCaseTest {
             "conflict" to "file".toByteArray(),
         )
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.conflict" })
@@ -119,7 +119,7 @@ class ZipArchiveEdgeCaseTest {
             "conflict/" to null,
         )
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.path.conflict" })
@@ -134,7 +134,7 @@ class ZipArchiveEdgeCaseTest {
         val target = tempDir.resolve("conflict-output")
 
         kotlin.test.assertFailsWith<ArchiveValidationException> {
-            Simplifiles.archive(zip).extractTo(target)
+            SimpliFiles.archive(zip).extractTo(target)
         }
 
         assertFalse(Files.exists(target))
@@ -144,7 +144,7 @@ class ZipArchiveEdgeCaseTest {
     fun `validate rejects suspicious compression ratio`() {
         val zip = createZip("large.txt" to ByteArray(16_384) { 'a'.code.toByte() })
 
-        val report = Simplifiles.archive(zip)
+        val report = SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(maxCompressionRatio = 2.0))
             .validate()
 
@@ -159,7 +159,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        val report = Simplifiles.archive(zip).validate()
+        val report = SimpliFiles.archive(zip).validate()
 
         assertFalse(report.isSafe)
         assertTrue(report.issues.any { it.code == "archive.entry.duplicate" })
@@ -172,7 +172,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        val plan = Simplifiles.archive(zip).planExtractionTo(tempDir.resolve("duplicate-plan"))
+        val plan = SimpliFiles.archive(zip).planExtractionTo(tempDir.resolve("duplicate-plan"))
 
         assertFalse(plan.isSafe)
         assertTrue(plan.entries.isEmpty())
@@ -186,7 +186,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        val plan = Simplifiles.archive(zip)
+        val plan = SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.KEEP_FIRST))
             .planExtractionTo(tempDir.resolve("keep-first-plan"))
 
@@ -205,7 +205,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        val plan = Simplifiles.archive(zip)
+        val plan = SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.KEEP_LAST))
             .planExtractionTo(tempDir.resolve("keep-last-plan"))
 
@@ -225,7 +225,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "third".toByteArray(),
         )
 
-        val plan = Simplifiles.archive(zip)
+        val plan = SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.RENAME))
             .planExtractionTo(tempDir.resolve("rename-plan"))
 
@@ -248,7 +248,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        Simplifiles.archive(zip)
+        SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.KEEP_FIRST))
             .extractToTemp()
             .use { archive ->
@@ -263,7 +263,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "second".toByteArray(),
         )
 
-        Simplifiles.archive(zip)
+        SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.KEEP_LAST))
             .extractToTemp()
             .use { archive ->
@@ -279,7 +279,7 @@ class ZipArchiveEdgeCaseTest {
             "same.txt" to "third".toByteArray(),
         )
 
-        Simplifiles.archive(zip)
+        SimpliFiles.archive(zip)
             .withPolicy(SecurityPolicy.strict().copy(duplicatePolicy = DuplicatePolicy.RENAME))
             .extractToTemp()
             .use { archive ->
@@ -302,7 +302,7 @@ class ZipArchiveEdgeCaseTest {
         val target = tempDir.resolve("duplicate-output")
 
         kotlin.test.assertFailsWith<ArchiveValidationException> {
-            Simplifiles.archive(zip).extractTo(target)
+            SimpliFiles.archive(zip).extractTo(target)
         }
 
         assertFalse(Files.exists(target))

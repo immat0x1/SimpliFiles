@@ -13,7 +13,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.simplifiles.Simplifiles;
+import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.ArchiveFile;
 import org.simplifiles.archive.ExtractedArchive;
 import org.simplifiles.archive.security.SecurityPolicy;
@@ -40,26 +40,26 @@ public class ZipArchiveBenchmark {
     private static final int BUFFER_SIZE = 64 * 1024;
 
     @Benchmark
-    public int simplifilesInspect(ArchiveState state) {
-        return Simplifiles.archive(state.archive).inspect().getEntryCount();
+    public int simpliFilesInspect(ArchiveState state) {
+        return SimpliFiles.archive(state.archive).inspect().getEntryCount();
     }
 
     @Benchmark
-    public boolean simplifilesValidate(ArchiveState state) {
-        return Simplifiles.archive(state.archive)
+    public boolean simpliFilesValidate(ArchiveState state) {
+        return SimpliFiles.archive(state.archive)
             .withPolicy(state.policy)
             .validate()
             .isSafe();
     }
 
     @Benchmark
-    public long simplifilesExtractToTemp(ArchiveState state, Blackhole blackhole) {
-        try (ExtractedArchive archive = Simplifiles.archive(state.archive)
+    public long simpliFilesExtractToTemp(ArchiveState state, Blackhole blackhole) {
+        try (ExtractedArchive archive = SimpliFiles.archive(state.archive)
             .withPolicy(state.policy)
             .extractToTemp()) {
             List<ArchiveFile> files = archive.getFiles();
             blackhole.consume(files);
-            return totalSimplifilesSize(files);
+            return totalSimpliFilesSize(files);
         }
     }
 
@@ -193,7 +193,7 @@ public class ZipArchiveBenchmark {
         return output;
     }
 
-    private static long totalSimplifilesSize(List<ArchiveFile> files) {
+    private static long totalSimpliFilesSize(List<ArchiveFile> files) {
         long total = 0;
         for (ArchiveFile file : files) {
             total += file.getSize();

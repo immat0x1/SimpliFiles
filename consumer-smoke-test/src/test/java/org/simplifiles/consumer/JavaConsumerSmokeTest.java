@@ -1,7 +1,7 @@
 package org.simplifiles.consumer;
 
 import org.junit.jupiter.api.Test;
-import org.simplifiles.Simplifiles;
+import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.ArchiveFile;
 import org.simplifiles.archive.ExtractedArchive;
 import org.simplifiles.archive.ValidationReport;
@@ -33,13 +33,13 @@ class JavaConsumerSmokeTest {
                 .duplicatePolicy(DuplicatePolicy.ERROR)
                 .build();
 
-        ValidationReport report = Simplifiles.archive(zip)
+        ValidationReport report = SimpliFiles.archive(zip)
                 .withPolicy(policy)
                 .validate();
 
         assertTrue(report.isSafe());
 
-        try (ExtractedArchive archive = Simplifiles.archive(zip)
+        try (ExtractedArchive archive = SimpliFiles.archive(zip)
                 .withPolicy(policy)
                 .extractToTemp()) {
             ArchiveFile config = archive.file("config/app.yml");
@@ -51,7 +51,7 @@ class JavaConsumerSmokeTest {
             archive.saveAsZip(output);
         }
 
-        try (ExtractedArchive archive = Simplifiles.archive(output).extractToTemp()) {
+        try (ExtractedArchive archive = SimpliFiles.archive(output).extractToTemp()) {
             assertEquals("name: java\n", archive.file("reports/summary.txt").readText(StandardCharsets.UTF_8));
             assertTrue(archive.directory("reports").exists());
         }
