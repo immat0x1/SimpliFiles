@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Gradle Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Check
+        run: ./gradlew check build --no-daemon
+
+      - name: Publish to Maven Local
+        run: ./gradlew publishToMavenLocal --no-daemon
+
+      - name: Consumer smoke test
+        run: ./gradlew -p consumer-smoke-test check --no-daemon
