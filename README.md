@@ -1,6 +1,20 @@
-# SimpliFiles
+<p align="center">
+  <img src="assets/simplifiles.png" alt="SimpliFiles logo" width="128" height="128">
+</p>
 
-Safe and convenient file toolkit for Java and Kotlin, with archive-first APIs.
+<h1 align="center">SimpliFiles</h1>
+
+<p align="center">
+  Safe and convenient file toolkit for Java and Kotlin, with archive-first APIs.
+</p>
+
+<p align="center">
+  <a href="https://github.com/immat0x1/SimpliFiles/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/immat0x1/SimpliFiles/ci.yml?branch=main&style=flat-square"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.0--SNAPSHOT-1684ff?style=flat-square"></a>
+  <img alt="Java" src="https://img.shields.io/badge/Java-17%2B-f89820?style=flat-square">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-JVM-7f52ff?style=flat-square">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-green?style=flat-square"></a>
+</p>
 
 ## Installation
 
@@ -21,7 +35,7 @@ dependencies {
 }
 ```
 
-Planned Maven coordinate:
+Planned stable coordinate:
 
 ```kotlin
 implementation("io.github.immat0x1:simplifiles:0.1.0")
@@ -31,94 +45,197 @@ implementation("io.github.immat0x1:simplifiles:0.1.0")
 
 - Java 17+
 - Kotlin/JVM
-- Archive module supports ZIP archives
+- Archive module currently supports ZIP
 
-## Kotlin
+## Quick Start
+
+```kotlin
+import org.simplifiles.SimpliFiles
+import org.simplifiles.files.OverwritePolicy
+
+val workspace = SimpliFiles.directory("workspace").create()
+
+workspace.file("notes/today.txt")
+    .writeTextAtomic("Ship small, useful APIs.\n")
+
+workspace.file("notes/today.txt")
+    .copyTo(workspace.resolveInside("backup/today.txt"), OverwritePolicy.ERROR)
+
+val text = workspace.file("notes/today.txt")
+    .readText(maxBytes = 64 * 1024)
+```
+
+## File Recipes
+
+### Atomic Writes
+
+Use atomic writes for files that should never be left half-written, such as JSON metadata, config files, indexes, manifests, and cache descriptors.
+
+```kotlin
+val file = SimpliFiles.file("config/settings.json")
+
+file.writeTextAtomic(
+    """
+    {
+      "theme": "system",
+      "sync": true
+    }
+    """.trimIndent()
+)
+```
+
+### Bounded Reads
+
+Use bounded reads when file size is controlled by a user or external input.
+
+```kotlin
+val manifest = SimpliFiles.file("manifest.json")
+    .readText(maxBytes = 256 * 1024)
+```
+
+If the file is larger than the limit, SimpliFiles throws `FileOperationException`.
+
+### Copy and Move Policies
+
+```kotlin
+import org.simplifiles.files.OverwritePolicy
+
+val source = SimpliFiles.file("input/report.txt")
+
+source.copyTo("output/report.txt", OverwritePolicy.ERROR)
+source.copyTo("output/latest.txt", OverwritePolicy.REPLACE)
+source.moveTo("archive/report.txt", OverwritePolicy.SKIP)
+```
+
+Policies:
+
+- `ERROR` fails when the target already exists
+- `REPLACE` replaces the target
+- `SKIP` leaves the target unchanged
+
+## Directory Recipes
+
+### Safe Child Paths
+
+`resolveInside` rejects absolute paths and parent traversal before returning a normalized path inside the directory root.
+
+```kotlin
+val root = SimpliFiles.directory("data").create()
+
+val safePath = root.resolveInside("users/alice/profile.json")
+root.file("users/alice/profile.json").writeTextAtomic("{}")
+```
+
+Unsafe paths throw `UnsafePathException`:
+
+```kotlin
+root.file("../outside.txt")
+root.file("/etc/passwd")
+root.file("C:\\Windows\\system.ini")
+```
+
+### Walk Files
+
+```kotlin
+val files = SimpliFiles.directory("data")
+    .walkFiles()
+    .filter { it.extension == "json" }
+```
+
+### Copy or Move Directory Trees
+
+```kotlin
+val source = SimpliFiles.directory("public").create()
+
+source.copyTo("dist/public", OverwritePolicy.REPLACE)
+source.moveTo("archive/public", OverwritePolicy.ERROR)
+```
+
+## Archive Recipes
+
+### Validate Before Extracting
 
 ```kotlin
 import org.simplifiles.SimpliFiles
 import org.simplifiles.archive.security.SecurityPolicy
-import org.simplifiles.files.OverwritePolicy
 
-SimpliFiles.archive("app.zip")
+val report = SimpliFiles.archive("upload.zip")
     .withPolicy(SecurityPolicy.strict())
+    .validate()
+
+if (report.isSafe) {
+    SimpliFiles.archive("upload.zip")
+        .withPolicy(SecurityPolicy.strict())
+        .extractTo("output")
+}
+```
+
+### Extract to a Temporary Workspace
+
+Temporary extractions are deleted when the `use` block exits.
+
+```kotlin
+SimpliFiles.archive("bundle.zip")
     .extractToTemp()
     .use { archive ->
-        val config = archive.file("config/app.yml").readText()
+        val manifest = archive.file("manifest.json").readText()
 
-        archive.file("logs/app.log").appendText("\nprocessed")
-        archive.file("reports/summary.txt").writeText(config)
-        archive.directory("reports").copyTo("backup/reports")
+        archive.file("processed.txt").writeText(manifest)
         archive.find("**/*.tmp").forEach { it.delete() }
-        archive.saveAsZip("cleaned.zip")
+        archive.saveAsZip("bundle-clean.zip")
     }
 ```
 
+### Preview an Extraction Plan
+
 ```kotlin
-val packDir = SimpliFiles.directory("icon-pack").create()
+val plan = SimpliFiles.archive("backup.zip")
+    .planExtractionTo("restore")
 
-packDir.file("metadata.json")
-    .writeTextAtomic("""{"schemaVersion":1}""")
-
-packDir.file("icons/edit.svg")
-    .writeText("<svg/>")
-
-val metadata = packDir.file("metadata.json").readText()
-val iconFiles = packDir.directory("icons").walkFiles()
-
-val safeIconPath = packDir.resolveInside("icons/edit.svg")
-val smallMetadata = packDir.file("metadata.json").readText(maxBytes = 64 * 1024)
-packDir.file("metadata.json").copyTo(packDir.resolveInside("backup/metadata.json"), OverwritePolicy.ERROR)
+println("entries: ${plan.totalEntries}")
+println("bytes: ${plan.totalBytesToWrite}")
+println("safe: ${plan.isSafe}")
 ```
 
-## Java
+### Progress and Cancellation
+
+```kotlin
+import org.simplifiles.archive.ArchiveExtractionOptions
+import org.simplifiles.archive.CancellationToken
+
+val token = CancellationToken { Thread.currentThread().isInterrupted }
+
+val options = ArchiveExtractionOptions.builder()
+    .bufferSize(128 * 1024)
+    .cancellationToken(token)
+    .progressListener { progress ->
+        println("${progress.entriesProcessed}/${progress.totalEntries}")
+    }
+    .build()
+
+SimpliFiles.archive("large.zip").extractTo("output", options)
+```
+
+## Java Example
 
 ```java
 import org.simplifiles.SimpliFiles;
-import org.simplifiles.archive.ArchiveExtractionOptions;
-import org.simplifiles.archive.ArchiveExtractionPlan;
-import org.simplifiles.archive.ArchiveFile;
-import org.simplifiles.archive.ArchiveSaveOptions;
 import org.simplifiles.archive.ExtractedArchive;
-import org.simplifiles.archive.ValidationReport;
-import org.simplifiles.archive.security.DuplicatePolicy;
 import org.simplifiles.archive.security.SecurityPolicy;
+import org.simplifiles.files.OverwritePolicy;
 
-import java.nio.charset.StandardCharsets;
+String metadata = SimpliFiles.directory("workspace")
+        .file("metadata.json")
+        .readText(64 * 1024);
 
-SecurityPolicy policy = SecurityPolicy.builder()
-        .maxEntries(10_000)
-        .duplicatePolicy(DuplicatePolicy.ERROR)
-        .build();
-ArchiveExtractionOptions options = ArchiveExtractionOptions.builder()
-        .progressListener(progress -> {
-            long processed = progress.getEntriesProcessed();
-            long total = progress.getTotalEntries();
-        })
-        .bufferSize(64 * 1024)
-        .build();
-ArchiveSaveOptions saveOptions = ArchiveSaveOptions.builder()
-        .bufferSize(64 * 1024)
-        .build();
+SimpliFiles.file("workspace/metadata.json")
+        .copyTo("workspace/metadata.backup.json", OverwritePolicy.ERROR);
 
-ValidationReport report = SimpliFiles.archive("app.zip")
-        .withPolicy(policy)
-        .validate();
-
-if (report.isSafe()) {
-    ArchiveExtractionPlan plan = SimpliFiles.archive("app.zip")
-            .withPolicy(policy)
-            .planExtractionTo("output");
-
-    try (ExtractedArchive archive = SimpliFiles.archive("app.zip")
-            .withPolicy(policy)
-            .extractToTemp(options)) {
-        ArchiveFile config = archive.file("config/app.yml");
-        String text = config.readText(StandardCharsets.UTF_8);
-
-        archive.file("reports/summary.txt").writeText(text, StandardCharsets.UTF_8);
-        archive.saveAsZip("cleaned.zip", saveOptions);
-    }
+try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
+        .withPolicy(SecurityPolicy.strict())
+        .extractToTemp()) {
+    archive.file("summary.txt").writeText(metadata);
+    archive.saveAsZip("bundle-updated.zip");
 }
 ```
 
@@ -144,7 +261,7 @@ if (report.isSafe()) {
 
 ## Security Defaults
 
-`SecurityPolicy.strict()` is the default.
+`SecurityPolicy.strict()` is the default archive policy.
 
 It rejects or limits:
 
@@ -159,10 +276,14 @@ It rejects or limits:
 - maximum single file size
 - maximum total uncompressed size
 
+Regular directory handles also reject child paths that escape their root.
+
 ## Errors
 
 Core exception types:
 
+- `FileOperationException`
+- `UnsafePathException`
 - `ArchiveValidationException`
 - `UnsafeArchivePathException`
 - `ExtractionTargetException`
