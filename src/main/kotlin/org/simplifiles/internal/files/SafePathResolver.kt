@@ -12,6 +12,14 @@ internal object SafePathResolver {
             throw UnsafePathException(path, "path must not be blank")
         }
 
+        if (path.startsWith("/") || path.startsWith("\\") || WINDOWS_ABSOLUTE_PATH.matches(path)) {
+            throw UnsafePathException(path, "path must be relative")
+        }
+
+        if (path.split('/', '\\').any { it == ".." }) {
+            throw UnsafePathException(path, "path must not contain parent traversal")
+        }
+
         val child = Path.of(path)
         if (child.isAbsolute) {
             throw UnsafePathException(path, "path must be relative")
@@ -25,4 +33,6 @@ internal object SafePathResolver {
 
         return resolved
     }
+
+    private val WINDOWS_ABSOLUTE_PATH = Regex("^[A-Za-z]:[/\\\\].*")
 }

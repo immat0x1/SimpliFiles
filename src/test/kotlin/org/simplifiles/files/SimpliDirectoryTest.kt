@@ -39,7 +39,13 @@ class SimpliDirectoryTest {
             root.file("../outside.txt")
         }
         assertFailsWith<UnsafePathException> {
+            root.file("icons/../metadata.json")
+        }
+        assertFailsWith<UnsafePathException> {
             root.directory("/absolute")
+        }
+        assertFailsWith<UnsafePathException> {
+            root.directory("C:\\absolute")
         }
     }
 

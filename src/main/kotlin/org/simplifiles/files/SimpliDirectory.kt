@@ -3,6 +3,7 @@ package org.simplifiles.files
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.internal.files.SafePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
+import org.simplifiles.internal.io.FileTreeCopier
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -93,7 +94,7 @@ class SimpliDirectory internal constructor(
             throw FileOperationException("Directory cannot be copied into itself: $target")
         }
 
-        copyDirectory(path, target)
+        FileTreeCopier.copyDirectory(path, target)
         return SimpliDirectory(target)
     }
 
@@ -115,24 +116,4 @@ class SimpliDirectory internal constructor(
 
     fun moveTo(target: File): SimpliDirectory = moveTo(target.toPath())
 
-    private fun copyDirectory(
-        source: Path,
-        target: Path,
-    ) {
-        Files.walk(source).use { stream ->
-            stream.asSequence()
-                .sortedBy { it.nameCount }
-                .forEach { current ->
-                    val relative = source.relativize(current)
-                    val destination = target.resolve(relative)
-
-                    if (Files.isDirectory(current)) {
-                        Files.createDirectories(destination)
-                    } else {
-                        Files.createDirectories(destination.parent)
-                        Files.copy(current, destination, StandardCopyOption.REPLACE_EXISTING)
-                    }
-                }
-        }
-    }
 }

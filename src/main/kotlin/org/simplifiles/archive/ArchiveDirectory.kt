@@ -3,6 +3,7 @@ package org.simplifiles.archive
 import org.simplifiles.exception.ArchiveOperationException
 import org.simplifiles.internal.archive.ArchivePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
+import org.simplifiles.internal.io.FileTreeCopier
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -105,7 +106,7 @@ class ArchiveDirectory internal constructor(
             throw ArchiveOperationException("Directory cannot be copied into itself: $path")
         }
 
-        copyDirectory(absolutePath, target)
+        FileTreeCopier.copyDirectory(absolutePath, target)
 
         return target.toArchiveDirectory()
     }
@@ -123,27 +124,6 @@ class ArchiveDirectory internal constructor(
         Files.move(absolutePath, target, StandardCopyOption.REPLACE_EXISTING)
 
         return target.toArchiveDirectory()
-    }
-
-    private fun copyDirectory(
-        source: Path,
-        target: Path,
-    ) {
-        Files.walk(source).use { stream ->
-            stream.asSequence()
-                .sortedBy { it.nameCount }
-                .forEach { current ->
-                    val relative = source.relativize(current)
-                    val destination = target.resolve(relative)
-
-                    if (Files.isDirectory(current)) {
-                        Files.createDirectories(destination)
-                    } else {
-                        Files.createDirectories(destination.parent)
-                        Files.copy(current, destination, StandardCopyOption.REPLACE_EXISTING)
-                    }
-                }
-        }
     }
 
     private fun Path.toArchiveFile(): ArchiveFile =
