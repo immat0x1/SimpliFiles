@@ -1,0 +1,462 @@
+public final class org/simplifiles/Simplifiles {
+	public static final field INSTANCE Lorg/simplifiles/Simplifiles;
+	public static final fun archive (Ljava/io/File;)Lorg/simplifiles/archive/ArchiveSource;
+	public static final fun archive (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveSource;
+	public static final fun archive (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchiveSource;
+}
+
+public final class org/simplifiles/archive/ArchiveDirectory {
+	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveDirectory;
+	public final fun create ()Lorg/simplifiles/archive/ArchiveDirectory;
+	public final fun deleteRecursively ()Z
+	public final fun exists ()Z
+	public final fun getAbsolutePath ()Ljava/nio/file/Path;
+	public final fun getDirectories ()Ljava/util/List;
+	public final fun getExists ()Z
+	public final fun getFiles ()Ljava/util/List;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveDirectory;
+	public final fun walkFiles ()Ljava/util/List;
+}
+
+public final class org/simplifiles/archive/ArchiveEntryInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZJJI)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun component6 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZJJI)Lorg/simplifiles/archive/ArchiveEntryInfo;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveEntryInfo;Ljava/lang/String;Ljava/lang/String;ZJJIILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveEntryInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCompressedSize ()J
+	public final fun getCompressionMethod ()I
+	public final fun getNormalizedPath ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getUncompressedSize ()J
+	public fun hashCode ()I
+	public final fun isDirectory ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/ArchiveExtractionOptions {
+	public static final field Companion Lorg/simplifiles/archive/ArchiveExtractionOptions$Companion;
+	public static final field DEFAULT_BUFFER_SIZE I
+	public fun <init> ()V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;I)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun builder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public static final fun defaults ()Lorg/simplifiles/archive/ArchiveExtractionOptions;
+	public final fun getBufferSize ()I
+	public final fun getCancellationToken ()Lorg/simplifiles/archive/CancellationToken;
+	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveProgressListener;
+	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+}
+
+public final class org/simplifiles/archive/ArchiveExtractionOptions$Builder {
+	public fun <init> ()V
+	public final fun bufferSize (I)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public final fun build ()Lorg/simplifiles/archive/ArchiveExtractionOptions;
+	public final fun cancellationToken (Lorg/simplifiles/archive/CancellationToken;)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public final fun progressListener (Lorg/simplifiles/archive/ArchiveProgressListener;)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+}
+
+public final class org/simplifiles/archive/ArchiveExtractionOptions$Companion {
+	public final fun builder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public final fun defaults ()Lorg/simplifiles/archive/ArchiveExtractionOptions;
+}
+
+public final class org/simplifiles/archive/ArchiveExtractionPlan {
+	public fun <init> (Lorg/simplifiles/archive/ArchiveFormat;Ljava/nio/file/Path;Ljava/util/List;Lorg/simplifiles/archive/ValidationReport;)V
+	public final fun component1 ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun component2 ()Ljava/nio/file/Path;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Lorg/simplifiles/archive/ValidationReport;
+	public final fun copy (Lorg/simplifiles/archive/ArchiveFormat;Ljava/nio/file/Path;Ljava/util/List;Lorg/simplifiles/archive/ValidationReport;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveExtractionPlan;Lorg/simplifiles/archive/ArchiveFormat;Ljava/nio/file/Path;Ljava/util/List;Lorg/simplifiles/archive/ValidationReport;ILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getFormat ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun getTargetRoot ()Ljava/nio/file/Path;
+	public final fun getTotalBytesToWrite ()J
+	public final fun getTotalEntries ()I
+	public final fun getValidationReport ()Lorg/simplifiles/archive/ValidationReport;
+	public fun hashCode ()I
+	public final fun isSafe ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/ArchiveFile {
+	public final fun appendText (Ljava/lang/String;)V
+	public final fun appendText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
+	public static synthetic fun appendText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
+	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFile;
+	public final fun delete ()Z
+	public final fun exists ()Z
+	public final fun getAbsolutePath ()Ljava/nio/file/Path;
+	public final fun getExists ()Z
+	public final fun getExtension ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getSize ()J
+	public final fun inputStream ()Ljava/io/InputStream;
+	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFile;
+	public final fun readBytes ()[B
+	public final fun readText ()Ljava/lang/String;
+	public final fun readText (Ljava/nio/charset/Charset;)Ljava/lang/String;
+	public static synthetic fun readText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun writeText (Ljava/lang/String;)V
+	public final fun writeText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
+	public static synthetic fun writeText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
+}
+
+public final class org/simplifiles/archive/ArchiveFormat : java/lang/Enum {
+	public static final field ZIP Lorg/simplifiles/archive/ArchiveFormat;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFormat;
+	public static fun values ()[Lorg/simplifiles/archive/ArchiveFormat;
+}
+
+public final class org/simplifiles/archive/ArchiveInspection {
+	public fun <init> (Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;)V
+	public final fun component1 ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;)Lorg/simplifiles/archive/ArchiveInspection;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveInspection;Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;ILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveInspection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getEntryCount ()I
+	public final fun getFormat ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun getTotalKnownUncompressedSize ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/ArchiveIssue {
+	public fun <init> (Lorg/simplifiles/archive/ArchiveIssueSeverity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveIssueSeverity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lorg/simplifiles/archive/ArchiveIssueSeverity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveIssue;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveIssue;Lorg/simplifiles/archive/ArchiveIssueSeverity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveIssue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getSeverity ()Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/ArchiveIssueSeverity : java/lang/Enum {
+	public static final field BLOCKER Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public static final field ERROR Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public static final field INFO Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public static final field WARNING Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveIssueSeverity;
+	public static fun values ()[Lorg/simplifiles/archive/ArchiveIssueSeverity;
+}
+
+public final class org/simplifiles/archive/ArchivePlannedAction : java/lang/Enum {
+	public static final field CREATE_DIRECTORY Lorg/simplifiles/archive/ArchivePlannedAction;
+	public static final field CREATE_FILE Lorg/simplifiles/archive/ArchivePlannedAction;
+	public static final field RENAME_DUPLICATE Lorg/simplifiles/archive/ArchivePlannedAction;
+	public static final field REPLACE_DUPLICATE Lorg/simplifiles/archive/ArchivePlannedAction;
+	public static final field SKIP_DUPLICATE Lorg/simplifiles/archive/ArchivePlannedAction;
+	public final fun getCreatesDirectory ()Z
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getWritesFile ()Z
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePlannedAction;
+	public static fun values ()[Lorg/simplifiles/archive/ArchivePlannedAction;
+}
+
+public final class org/simplifiles/archive/ArchivePlannedEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchivePlannedAction;ZJJ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/nio/file/Path;
+	public final fun component4 ()Lorg/simplifiles/archive/ArchivePlannedAction;
+	public final fun component5 ()Z
+	public final fun component6 ()J
+	public final fun component7 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchivePlannedAction;ZJJ)Lorg/simplifiles/archive/ArchivePlannedEntry;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchivePlannedEntry;Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchivePlannedAction;ZJJILjava/lang/Object;)Lorg/simplifiles/archive/ArchivePlannedEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lorg/simplifiles/archive/ArchivePlannedAction;
+	public final fun getCompressedSize ()J
+	public final fun getDestinationPath ()Ljava/nio/file/Path;
+	public final fun getNormalizedPath ()Ljava/lang/String;
+	public final fun getSourcePath ()Ljava/lang/String;
+	public final fun getUncompressedSize ()J
+	public fun hashCode ()I
+	public final fun isDirectory ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/ArchiveProgress {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;J)V
+	public fun <init> (Ljava/lang/String;JJ)V
+	public fun <init> (Ljava/lang/String;JJJ)V
+	public fun <init> (Ljava/lang/String;JJJJ)V
+	public synthetic fun <init> (Ljava/lang/String;JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun copy (Ljava/lang/String;JJJJ)Lorg/simplifiles/archive/ArchiveProgress;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveProgress;Ljava/lang/String;JJJJILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytesWritten ()J
+	public final fun getCurrentEntryPath ()Ljava/lang/String;
+	public final fun getEntriesProcessed ()J
+	public final fun getTotalBytes ()J
+	public final fun getTotalEntries ()J
+	public fun hashCode ()I
+	public final fun isComplete ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class org/simplifiles/archive/ArchiveProgressListener {
+	public abstract fun onProgress (Lorg/simplifiles/archive/ArchiveProgress;)V
+}
+
+public final class org/simplifiles/archive/ArchiveSaveOptions {
+	public static final field Companion Lorg/simplifiles/archive/ArchiveSaveOptions$Companion;
+	public static final field DEFAULT_BUFFER_SIZE I
+	public fun <init> ()V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;I)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun builder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public static final fun defaults ()Lorg/simplifiles/archive/ArchiveSaveOptions;
+	public final fun getBufferSize ()I
+	public final fun getCancellationToken ()Lorg/simplifiles/archive/CancellationToken;
+	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveSaveProgressListener;
+	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+}
+
+public final class org/simplifiles/archive/ArchiveSaveOptions$Builder {
+	public fun <init> ()V
+	public final fun bufferSize (I)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun build ()Lorg/simplifiles/archive/ArchiveSaveOptions;
+	public final fun cancellationToken (Lorg/simplifiles/archive/CancellationToken;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun progressListener (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+}
+
+public final class org/simplifiles/archive/ArchiveSaveOptions$Companion {
+	public final fun builder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun defaults ()Lorg/simplifiles/archive/ArchiveSaveOptions;
+}
+
+public final class org/simplifiles/archive/ArchiveSaveProgress {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;J)V
+	public fun <init> (Ljava/lang/String;JJ)V
+	public fun <init> (Ljava/lang/String;JJJ)V
+	public fun <init> (Ljava/lang/String;JJJJ)V
+	public synthetic fun <init> (Ljava/lang/String;JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun copy (Ljava/lang/String;JJJJ)Lorg/simplifiles/archive/ArchiveSaveProgress;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ArchiveSaveProgress;Ljava/lang/String;JJJJILjava/lang/Object;)Lorg/simplifiles/archive/ArchiveSaveProgress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytesWritten ()J
+	public final fun getCurrentEntryPath ()Ljava/lang/String;
+	public final fun getEntriesProcessed ()J
+	public final fun getTotalBytes ()J
+	public final fun getTotalEntries ()J
+	public fun hashCode ()I
+	public final fun isComplete ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class org/simplifiles/archive/ArchiveSaveProgressListener {
+	public abstract fun onProgress (Lorg/simplifiles/archive/ArchiveSaveProgress;)V
+}
+
+public final class org/simplifiles/archive/ArchiveSource {
+	public final fun extractTo (Ljava/io/File;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractTo (Ljava/lang/String;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractTo (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractToTemp ()Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractToTemp (Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun getPath ()Ljava/nio/file/Path;
+	public final fun getPolicy ()Lorg/simplifiles/archive/security/SecurityPolicy;
+	public final fun inspect ()Lorg/simplifiles/archive/ArchiveInspection;
+	public final fun planExtractionTo (Ljava/io/File;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public final fun planExtractionTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public final fun planExtractionTo (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public final fun validate ()Lorg/simplifiles/archive/ValidationReport;
+	public final fun withPolicy (Lorg/simplifiles/archive/security/SecurityPolicy;)Lorg/simplifiles/archive/ArchiveSource;
+}
+
+public abstract interface class org/simplifiles/archive/CancellationToken {
+	public static final field Companion Lorg/simplifiles/archive/CancellationToken$Companion;
+	public static fun fromSupplier (Ljava/util/function/BooleanSupplier;)Lorg/simplifiles/archive/CancellationToken;
+	public abstract fun isCancellationRequested ()Z
+	public static fun none ()Lorg/simplifiles/archive/CancellationToken;
+}
+
+public final class org/simplifiles/archive/CancellationToken$Companion {
+	public final fun fromSupplier (Ljava/util/function/BooleanSupplier;)Lorg/simplifiles/archive/CancellationToken;
+	public final fun none ()Lorg/simplifiles/archive/CancellationToken;
+}
+
+public final class org/simplifiles/archive/ExtractedArchive : java/lang/AutoCloseable {
+	public fun close ()V
+	public final fun directory (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveDirectory;
+	public final fun file (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFile;
+	public final fun find (Ljava/lang/String;)Ljava/util/List;
+	public final fun getDirectories ()Ljava/util/List;
+	public final fun getFiles ()Ljava/util/List;
+	public final fun getRoot ()Ljava/nio/file/Path;
+	public final fun saveAsZip (Ljava/io/File;)V
+	public final fun saveAsZip (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
+	public final fun saveAsZip (Ljava/lang/String;)V
+	public final fun saveAsZip (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
+	public final fun saveAsZip (Ljava/nio/file/Path;)V
+	public final fun saveAsZip (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
+}
+
+public final class org/simplifiles/archive/ValidationReport {
+	public fun <init> ()V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;Ljava/util/List;)Lorg/simplifiles/archive/ValidationReport;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/ValidationReport;Lorg/simplifiles/archive/ArchiveFormat;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/simplifiles/archive/ValidationReport;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getFormat ()Lorg/simplifiles/archive/ArchiveFormat;
+	public final fun getIssues ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isSafe ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/security/DuplicatePolicy : java/lang/Enum {
+	public static final field ERROR Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public static final field KEEP_FIRST Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public static final field KEEP_LAST Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public static final field RENAME Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public static fun values ()[Lorg/simplifiles/archive/security/DuplicatePolicy;
+}
+
+public final class org/simplifiles/archive/security/SecurityPolicy {
+	public static final field Companion Lorg/simplifiles/archive/security/SecurityPolicy$Companion;
+	public fun <init> ()V
+	public fun <init> (J)V
+	public fun <init> (JJ)V
+	public fun <init> (JJJ)V
+	public fun <init> (JJJD)V
+	public fun <init> (JJJDI)V
+	public fun <init> (JJJDIZ)V
+	public fun <init> (JJJDIZZ)V
+	public fun <init> (JJJDIZZZ)V
+	public fun <init> (JJJDIZZZLorg/simplifiles/archive/security/DuplicatePolicy;)V
+	public synthetic fun <init> (JJJDIZZZLorg/simplifiles/archive/security/DuplicatePolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun builder ()Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()J
+	public final fun component4 ()D
+	public final fun component5 ()I
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public final fun copy (JJJDIZZZLorg/simplifiles/archive/security/DuplicatePolicy;)Lorg/simplifiles/archive/security/SecurityPolicy;
+	public static synthetic fun copy$default (Lorg/simplifiles/archive/security/SecurityPolicy;JJJDIZZZLorg/simplifiles/archive/security/DuplicatePolicy;ILjava/lang/Object;)Lorg/simplifiles/archive/security/SecurityPolicy;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllowAbsolutePaths ()Z
+	public final fun getAllowHardlinks ()Z
+	public final fun getAllowSymlinks ()Z
+	public final fun getDuplicatePolicy ()Lorg/simplifiles/archive/security/DuplicatePolicy;
+	public final fun getMaxCompressionRatio ()D
+	public final fun getMaxEntries ()J
+	public final fun getMaxNestedArchiveDepth ()I
+	public final fun getMaxSingleFileSize ()J
+	public final fun getMaxTotalUncompressedSize ()J
+	public fun hashCode ()I
+	public static final fun strict ()Lorg/simplifiles/archive/security/SecurityPolicy;
+	public final fun toBuilder ()Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/simplifiles/archive/security/SecurityPolicy$Builder {
+	public fun <init> ()V
+	public final fun allowAbsolutePaths (Z)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun allowHardlinks (Z)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun allowSymlinks (Z)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun build ()Lorg/simplifiles/archive/security/SecurityPolicy;
+	public final fun duplicatePolicy (Lorg/simplifiles/archive/security/DuplicatePolicy;)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun maxCompressionRatio (D)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun maxEntries (J)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun maxNestedArchiveDepth (I)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun maxSingleFileSize (J)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun maxTotalUncompressedSize (J)Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+}
+
+public final class org/simplifiles/archive/security/SecurityPolicy$Companion {
+	public final fun builder ()Lorg/simplifiles/archive/security/SecurityPolicy$Builder;
+	public final fun strict ()Lorg/simplifiles/archive/security/SecurityPolicy;
+}
+
+public final class org/simplifiles/exception/ArchiveOperationCanceledException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> ()V
+}
+
+public final class org/simplifiles/exception/ArchiveOperationException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class org/simplifiles/exception/ArchiveValidationException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Lorg/simplifiles/archive/ValidationReport;)V
+	public final fun getReport ()Lorg/simplifiles/archive/ValidationReport;
+}
+
+public final class org/simplifiles/exception/ArchiveWriteException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;)V
+}
+
+public final class org/simplifiles/exception/CorruptedArchiveException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/nio/file/Path;Ljava/lang/Throwable;)V
+}
+
+public final class org/simplifiles/exception/ExtractionTargetException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;)V
+}
+
+public class org/simplifiles/exception/SimplifilesException : java/io/IOException {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public final class org/simplifiles/exception/UnsafeArchivePathException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class org/simplifiles/exception/UnsupportedArchiveFormatException : org/simplifiles/exception/SimplifilesException {
+	public fun <init> (Ljava/nio/file/Path;)V
+}
+
