@@ -302,6 +302,68 @@ class SimpliDirectoryTest {
     }
 
     @Test
+    fun `directory zip handles many small files`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        val fileCount = 300
+        var totalBytes = 0L
+        repeat(fileCount) { index ->
+            val content = "item-$index"
+            totalBytes += content.toByteArray().size
+            root.file("items/group-${index % 10}/item-$index.txt").writeText(content)
+        }
+        val output = tempDir.resolve("many-small-files.zip")
+        val progressEvents = mutableListOf<ArchiveSaveProgress>()
+        val options = ArchiveSaveOptions.builder()
+            .progressListener(ArchiveSaveProgressListener { progress ->
+                progressEvents += progress
+            })
+            .build()
+
+        root.zipTo(output, options)
+
+        val finalProgress = progressEvents.last()
+        assertEquals(totalBytes, finalProgress.totalBytes)
+        assertEquals(totalBytes, finalProgress.bytesWritten)
+        assertTrue(finalProgress.totalEntries >= fileCount)
+        assertTrue(finalProgress.isComplete)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals("item-0", zip.readText("items/group-0/item-0.txt"))
+            assertEquals("item-299", zip.readText("items/group-9/item-299.txt"))
+        }
+    }
+
+    @Test
+    fun `directory zip handles larger files without loading them into memory at once`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        val bytes = ByteArray(1024 * 1024) { index -> (index % 251).toByte() }
+        root.file("payload.bin").writeBytes(bytes)
+        val output = tempDir.resolve("large-file.zip")
+        val progressEvents = mutableListOf<ArchiveSaveProgress>()
+        val options = ArchiveSaveOptions.builder()
+            .bufferSize(8 * 1024)
+            .progressListener(ArchiveSaveProgressListener { progress ->
+                if (progress.currentEntryPath == "payload.bin") {
+                    progressEvents += progress
+                }
+            })
+            .build()
+
+        root.zipTo(output, options)
+
+        assertTrue(progressEvents.size > 8)
+        assertEquals(bytes.size.toLong(), progressEvents.last().bytesWritten)
+        ZipFile(output.toFile()).use { zip ->
+            val extracted = zip.getInputStream(zip.getEntry("payload.bin")).use { input ->
+                input.readBytes()
+            }
+            assertEquals(bytes.size, extracted.size)
+            assertEquals(bytes.first(), extracted.first())
+            assertEquals(bytes.last(), extracted.last())
+        }
+    }
+
+    @Test
     fun `directory copy and move support overwrite policies`() {
         val source = SimpliFiles.directory(tempDir.resolve("source")).create()
         source.file("file.txt").writeText("new")
