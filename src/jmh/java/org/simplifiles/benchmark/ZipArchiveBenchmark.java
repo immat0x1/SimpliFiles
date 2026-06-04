@@ -15,8 +15,10 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.ArchiveFile;
+import org.simplifiles.archive.ArchiveSaveOptions;
 import org.simplifiles.archive.ExtractedArchive;
 import org.simplifiles.archive.security.SecurityPolicy;
+import org.simplifiles.files.OverwritePolicy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,6 +89,33 @@ public class ZipArchiveBenchmark {
         }
     }
 
+    @Benchmark
+    public long simpliFilesZipDirectory(DirectoryState state) throws IOException {
+        Path output = Files.createTempFile(state.workDir, "simplifiles-", ".zip");
+        try {
+            SimpliFiles.directory(state.directory).zipTo(
+                output,
+                ArchiveSaveOptions.builder()
+                    .overwritePolicy(OverwritePolicy.REPLACE)
+                    .build()
+            );
+            return Files.size(output);
+        } finally {
+            Files.deleteIfExists(output);
+        }
+    }
+
+    @Benchmark
+    public long javaZipOutputStreamZipDirectory(DirectoryState state) throws IOException {
+        Path output = Files.createTempFile(state.workDir, "java-zip-", ".zip");
+        try {
+            zipDirectoryWithJava(state.directory, output);
+            return Files.size(output);
+        } finally {
+            Files.deleteIfExists(output);
+        }
+    }
+
     @State(Scope.Benchmark)
     public static class ArchiveState {
         @Param({"small", "manySmall", "mixed"})
@@ -115,6 +144,27 @@ public class ZipArchiveBenchmark {
         }
     }
 
+    @State(Scope.Benchmark)
+    public static class DirectoryState {
+        @Param({"small", "manySmall", "mixed"})
+        public String scenario;
+
+        Path workDir;
+        Path directory;
+
+        @Setup
+        public void setup() throws IOException {
+            workDir = Files.createTempDirectory("simplifiles-jmh-zip-output-");
+            directory = workDir.resolve(scenario);
+            createDirectoryTree(directory, scenario);
+        }
+
+        @TearDown
+        public void tearDown() throws IOException {
+            deleteRecursively(workDir);
+        }
+    }
+
     private static void createArchive(Path archive, String scenario) throws IOException {
         try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
             switch (scenario) {
@@ -126,6 +176,30 @@ public class ZipArchiveBenchmark {
                 }
                 default -> throw new IllegalArgumentException("Unknown benchmark scenario: " + scenario);
             }
+        }
+    }
+
+    private static void createDirectoryTree(Path directory, String scenario) throws IOException {
+        Files.createDirectories(directory);
+        switch (scenario) {
+            case "small" -> writeDirectoryFiles(directory.resolve("small"), 32, 1_024);
+            case "manySmall" -> writeDirectoryFiles(directory.resolve("many-small"), 1_000, 128);
+            case "mixed" -> {
+                writeDirectoryFiles(directory.resolve("mixed/docs"), 64, 16 * 1024);
+                writeDirectoryFiles(directory.resolve("mixed/assets"), 4, 1024 * 1024);
+            }
+            default -> throw new IllegalArgumentException("Unknown benchmark scenario: " + scenario);
+        }
+    }
+
+    private static void writeDirectoryFiles(
+        Path directory,
+        int fileCount,
+        int fileSize
+    ) throws IOException {
+        Files.createDirectories(directory);
+        for (int index = 0; index < fileCount; index++) {
+            Files.write(directory.resolve("file-" + index + ".bin"), payload(fileSize, index));
         }
     }
 
@@ -155,6 +229,33 @@ public class ZipArchiveBenchmark {
             bytes[index] = (byte) (value >>> 16);
         }
         return bytes;
+    }
+
+    private static void zipDirectoryWithJava(Path directory, Path output) throws IOException {
+        try (
+            ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(output));
+            var paths = Files.walk(directory)
+        ) {
+            List<Path> sorted = paths
+                .filter(path -> !path.equals(directory))
+                .sorted()
+                .toList();
+
+            for (Path path : sorted) {
+                String archivePath = directory.relativize(path).toString().replace('\\', '/');
+                if (Files.isDirectory(path)) {
+                    zip.putNextEntry(new ZipEntry(archivePath + "/"));
+                    zip.closeEntry();
+                    continue;
+                }
+
+                zip.putNextEntry(new ZipEntry(archivePath));
+                try (InputStream input = Files.newInputStream(path)) {
+                    input.transferTo(zip);
+                }
+                zip.closeEntry();
+            }
+        }
     }
 
     private static void extractWithJavaZipFile(Path archive, Path target) throws IOException {

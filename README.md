@@ -308,6 +308,7 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
 - Save overwrite policy, compression level, and entry filters
+- JMH benchmarks against direct Java ZIP baselines
 - Glob search for extracted files
 - Save modified extracted contents back to ZIP
 
