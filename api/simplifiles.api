@@ -27,12 +27,24 @@ public final class org/simplifiles/archive/ArchiveDirectory {
 
 public abstract interface class org/simplifiles/archive/ArchiveEntryFilter {
 	public static final field Companion Lorg/simplifiles/archive/ArchiveEntryFilter$Companion;
+	public static fun allOf ([Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public static fun anyOf ([Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public static fun excludeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
 	public abstract fun include (Ljava/lang/String;)Z
 	public static fun includeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public static fun not (Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public static fun pathEndsWith (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public static fun pathStartsWith (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveEntryFilter;
 }
 
 public final class org/simplifiles/archive/ArchiveEntryFilter$Companion {
+	public final fun allOf ([Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun anyOf ([Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun excludeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
 	public final fun includeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun not (Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun pathEndsWith (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun pathStartsWith (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveEntryFilter;
 }
 
 public final class org/simplifiles/archive/ArchiveEntryInfo {

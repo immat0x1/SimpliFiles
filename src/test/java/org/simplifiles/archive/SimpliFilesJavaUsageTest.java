@@ -42,7 +42,7 @@ class SimpliFilesJavaUsageTest {
                 .bufferSize(16 * 1024)
                 .overwritePolicy(OverwritePolicy.ERROR)
                 .compressionLevel(ArchiveSaveOptions.BEST_SPEED_LEVEL)
-                .entryFilter(path -> !path.endsWith(".tmp"))
+                .entryFilter(ArchiveEntryFilter.not(ArchiveEntryFilter.pathEndsWith(".tmp")))
                 .build();
 
         ValidationReport report = SimpliFiles.archive(zip)

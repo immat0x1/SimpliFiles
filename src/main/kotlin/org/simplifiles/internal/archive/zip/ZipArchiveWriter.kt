@@ -9,6 +9,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -29,7 +30,9 @@ internal object ZipArchiveWriter {
 
         checkCanceled(options)
 
-        if (Files.exists(normalizedOutput)) {
+        val outputExists = Files.exists(normalizedOutput)
+
+        if (outputExists) {
             when (options.overwritePolicy) {
                 OverwritePolicy.ERROR -> throw ArchiveWriteException(output, "output file already exists")
                 OverwritePolicy.SKIP -> return
@@ -37,7 +40,6 @@ internal object ZipArchiveWriter {
                     if (Files.isDirectory(normalizedOutput)) {
                         throw ArchiveWriteException(output, "output path is a directory")
                     }
-                    Files.delete(normalizedOutput)
                 }
             }
         }
@@ -45,6 +47,12 @@ internal object ZipArchiveWriter {
         normalizedOutput.parent?.let { Files.createDirectories(it) }
         val directories = listDirectories(normalizedRoot, options)
         val files = listFiles(normalizedRoot, options)
+        val replacingExisting = outputExists && options.overwritePolicy == OverwritePolicy.REPLACE
+        val writePath = if (replacingExisting) {
+            Files.createTempFile(normalizedOutput.parent, "${normalizedOutput.fileName}.", ".tmp")
+        } else {
+            normalizedOutput
+        }
         val progress = SaveProgress(
             options = options,
             totalEntries = (directories.size + files.size).toLong(),
@@ -54,21 +62,38 @@ internal object ZipArchiveWriter {
         try {
             progress.emit(currentEntryPath = null)
             ZipOutputStream(
-                Files.newOutputStream(
-                    normalizedOutput,
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE,
-                ),
+                newOutputStream(writePath, replacingExisting),
             ).use { zip ->
                 zip.setLevel(options.compressionLevel)
                 writeDirectories(zip, normalizedRoot, directories, progress)
                 writeFiles(zip, normalizedRoot, files, progress, options.bufferSize)
             }
+            if (writePath != normalizedOutput) {
+                Files.move(writePath, normalizedOutput, StandardCopyOption.REPLACE_EXISTING)
+            }
         } catch (exception: Throwable) {
-            Files.deleteIfExists(normalizedOutput)
+            Files.deleteIfExists(writePath)
             throw exception
         }
     }
+
+    private fun newOutputStream(
+        path: Path,
+        replacingExisting: Boolean,
+    ): OutputStream =
+        if (replacingExisting) {
+            Files.newOutputStream(
+                path,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE,
+            )
+        } else {
+            Files.newOutputStream(
+                path,
+                StandardOpenOption.CREATE_NEW,
+                StandardOpenOption.WRITE,
+            )
+        }
 
     private fun writeDirectories(
         zip: ZipOutputStream,

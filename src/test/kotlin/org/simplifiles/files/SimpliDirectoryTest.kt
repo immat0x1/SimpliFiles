@@ -2,13 +2,19 @@ package org.simplifiles.files
 
 import org.junit.jupiter.api.io.TempDir
 import org.simplifiles.SimpliFiles
+import org.simplifiles.archive.ArchiveEntryFilter
 import org.simplifiles.archive.ArchiveSaveOptions
+import org.simplifiles.archive.ArchiveSaveProgress
+import org.simplifiles.archive.ArchiveSaveProgressListener
+import org.simplifiles.archive.CancellationToken
+import org.simplifiles.exception.ArchiveOperationCanceledException
 import org.simplifiles.exception.ArchiveWriteException
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.exception.UnsafePathException
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -146,6 +152,153 @@ class SimpliDirectoryTest {
         root.zipTo(output, options)
 
         assertEquals("old", Files.readAllBytes(output).toString(Charsets.UTF_8))
+    }
+
+    @Test
+    fun `directory zip reports progress until completion`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.directory("empty").create()
+        root.file("reports/summary.txt").writeText("summary")
+        val output = tempDir.resolve("workspace.zip")
+        val progressEvents = mutableListOf<ArchiveSaveProgress>()
+        val options = ArchiveSaveOptions.builder()
+            .progressListener(ArchiveSaveProgressListener { progress ->
+                progressEvents += progress
+            })
+            .build()
+
+        root.zipTo(output, options)
+
+        val finalProgress = progressEvents.last()
+        assertTrue(output.toFile().exists())
+        assertEquals(3, finalProgress.totalEntries)
+        assertEquals(3, finalProgress.entriesProcessed)
+        assertEquals(7, finalProgress.totalBytes)
+        assertEquals(7, finalProgress.bytesWritten)
+        assertTrue(finalProgress.isComplete)
+    }
+
+    @Test
+    fun `directory zip uses configured buffer size`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("large.txt").writeBytes(ByteArray(32) { it.toByte() })
+        val output = tempDir.resolve("workspace.zip")
+        val progressEvents = mutableListOf<ArchiveSaveProgress>()
+        val options = ArchiveSaveOptions.builder()
+            .bufferSize(5)
+            .progressListener(ArchiveSaveProgressListener { progress ->
+                if (progress.currentEntryPath == "large.txt" && progress.bytesWritten > 0) {
+                    progressEvents += progress
+                }
+            })
+            .build()
+
+        root.zipTo(output, options)
+
+        assertTrue(progressEvents.size > 1)
+        assertEquals(32, progressEvents.last().bytesWritten)
+    }
+
+    @Test
+    fun `directory zip cancellation deletes partial output`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("large.txt").writeBytes(ByteArray(128 * 1024) { it.toByte() })
+        val output = tempDir.resolve("workspace.zip")
+        val canceled = AtomicBoolean(false)
+        val options = ArchiveSaveOptions.builder()
+            .progressListener(ArchiveSaveProgressListener { progress ->
+                if (progress.bytesWritten > 0) {
+                    canceled.set(true)
+                }
+            })
+            .cancellationToken(CancellationToken.fromSupplier(canceled::get))
+            .build()
+
+        assertFailsWith<ArchiveOperationCanceledException> {
+            root.zipTo(output, options)
+        }
+
+        assertFalse(output.toFile().exists())
+    }
+
+    @Test
+    fun `pre canceled directory zip replace preserves existing output`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("{}")
+        val output = tempDir.resolve("workspace.zip")
+        Files.write(output, "existing".toByteArray())
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.REPLACE)
+            .cancellationToken(CancellationToken { true })
+            .build()
+
+        assertFailsWith<ArchiveOperationCanceledException> {
+            root.zipTo(output, options)
+        }
+
+        assertEquals("existing", Files.readAllBytes(output).toString(Charsets.UTF_8))
+    }
+
+    @Test
+    fun `directory zip can write empty archive after filtering all entries`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.directory("empty").create()
+        root.file("config.json").writeText("{}")
+        val output = tempDir.resolve("workspace.zip")
+        val options = ArchiveSaveOptions.builder()
+            .entryFilter(ArchiveEntryFilter.excludeAll())
+            .build()
+
+        root.zipTo(output, options)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals(0, zip.size())
+        }
+    }
+
+    @Test
+    fun `directory zip entry filter helpers can exclude path groups`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("reports/summary.txt").writeText("summary")
+        root.file("tmp/cache.bin").writeText("cache")
+        root.file("logs/app.log").writeText("log")
+        val output = tempDir.resolve("workspace.zip")
+        val options = ArchiveSaveOptions.builder()
+            .entryFilter(
+                ArchiveEntryFilter.allOf(
+                    ArchiveEntryFilter.not(ArchiveEntryFilter.pathStartsWith("tmp/")),
+                    ArchiveEntryFilter.not(ArchiveEntryFilter.pathEndsWith(".log")),
+                ),
+            )
+            .build()
+
+        root.zipTo(output, options)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals("summary", zip.readText("reports/summary.txt"))
+            assertEquals(null, zip.getEntry("tmp/cache.bin"))
+            assertEquals(null, zip.getEntry("logs/app.log"))
+        }
+    }
+
+    @Test
+    fun `directory zip filter failure preserves existing output`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("{}")
+        val output = tempDir.resolve("workspace.zip")
+        Files.write(output, "existing".toByteArray())
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.REPLACE)
+            .entryFilter {
+                throw IllegalStateException("filter failed")
+            }
+            .build()
+
+        assertFailsWith<IllegalStateException> {
+            root.zipTo(output, options)
+        }
+
+        assertEquals("existing", Files.readAllBytes(output).toString(Charsets.UTF_8))
     }
 
     @Test

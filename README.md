@@ -148,13 +148,19 @@ val archive = workspace.zipTo("workspace.zip")
 With save options:
 
 ```kotlin
+import org.simplifiles.archive.ArchiveEntryFilter
 import org.simplifiles.archive.ArchiveSaveOptions
 import org.simplifiles.files.OverwritePolicy
 
 val options = ArchiveSaveOptions.builder()
     .overwritePolicy(OverwritePolicy.REPLACE)
     .compressionLevel(ArchiveSaveOptions.BEST_SPEED_LEVEL)
-    .entryFilter { path -> !path.startsWith("tmp/") && !path.endsWith(".log") }
+    .entryFilter(
+        ArchiveEntryFilter.allOf(
+            ArchiveEntryFilter.not(ArchiveEntryFilter.pathStartsWith("tmp/")),
+            ArchiveEntryFilter.not(ArchiveEntryFilter.pathEndsWith(".log")),
+        )
+    )
     .build()
 
 workspace.zipTo("workspace.zip", options)

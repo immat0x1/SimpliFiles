@@ -538,6 +538,79 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `pre canceled saveAsZip replace preserves existing output`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val output = tempDir.resolve("pre-canceled-existing.zip")
+        Files.writeString(output, "existing")
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.REPLACE)
+            .cancellationToken(CancellationToken { true })
+            .build()
+
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
+            assertFailsWith<ArchiveOperationCanceledException> {
+                archive.saveAsZip(output, options)
+            }
+        }
+
+        assertEquals("existing", output.readText())
+    }
+
+    @Test
+    fun `saveAsZip can write empty archive after filtering all entries`() {
+        val zip = createZip(
+            "empty/" to null,
+            "file.txt" to "hello".toByteArray(),
+        )
+        val output = tempDir.resolve("filtered-empty.zip")
+        val options = ArchiveSaveOptions.builder()
+            .entryFilter(ArchiveEntryFilter.excludeAll())
+            .build()
+
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
+            archive.saveAsZip(output, options)
+        }
+
+        ZipFile(output.toFile()).use { repacked ->
+            assertEquals(0, repacked.size())
+        }
+    }
+
+    @Test
+    fun `saveAsZip filter failure preserves existing output`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val output = tempDir.resolve("filter-failed-existing.zip")
+        Files.writeString(output, "existing")
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.REPLACE)
+            .entryFilter {
+                throw IllegalStateException("filter failed")
+            }
+            .build()
+
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
+            assertFailsWith<IllegalStateException> {
+                archive.saveAsZip(output, options)
+            }
+        }
+
+        assertEquals("existing", output.readText())
+    }
+
+    @Test
+    fun `archive entry filter helpers compose predicates`() {
+        val filter = ArchiveEntryFilter.allOf(
+            ArchiveEntryFilter.pathStartsWith("reports\\"),
+            ArchiveEntryFilter.not(ArchiveEntryFilter.pathEndsWith(".tmp")),
+        )
+
+        assertTrue(filter.include("reports/summary.txt"))
+        assertFalse(filter.include("reports/debug.tmp"))
+        assertFalse(filter.include("logs/app.log"))
+        assertTrue(ArchiveEntryFilter.anyOf(filter, ArchiveEntryFilter.pathEndsWith(".log")).include("logs/app.log"))
+    }
+
+    @Test
     fun `save options reject invalid buffer size`() {
         assertFailsWith<IllegalArgumentException> {
             ArchiveSaveOptions(bufferSize = 0)

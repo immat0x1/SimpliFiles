@@ -4,6 +4,8 @@
 
 - Started `0.1.4-SNAPSHOT` development.
 - Added archive save overwrite policy, compression level, and entry filter options.
+- Added composable `ArchiveEntryFilter` helpers.
+- Improved `REPLACE` archive saves so existing output is preserved until the new archive is written successfully.
 
 ## 0.1.3
 
