@@ -25,6 +25,16 @@ public final class org/simplifiles/archive/ArchiveDirectory {
 	public final fun walkFiles ()Ljava/util/List;
 }
 
+public abstract interface class org/simplifiles/archive/ArchiveEntryFilter {
+	public static final field Companion Lorg/simplifiles/archive/ArchiveEntryFilter$Companion;
+	public abstract fun include (Ljava/lang/String;)Z
+	public static fun includeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+}
+
+public final class org/simplifiles/archive/ArchiveEntryFilter$Companion {
+	public final fun includeAll ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+}
+
 public final class org/simplifiles/archive/ArchiveEntryInfo {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZJJI)V
 	public final fun component1 ()Ljava/lang/String;
@@ -235,17 +245,27 @@ public abstract interface class org/simplifiles/archive/ArchiveProgressListener 
 }
 
 public final class org/simplifiles/archive/ArchiveSaveOptions {
+	public static final field BEST_COMPRESSION_LEVEL I
+	public static final field BEST_SPEED_LEVEL I
 	public static final field Companion Lorg/simplifiles/archive/ArchiveSaveOptions$Companion;
 	public static final field DEFAULT_BUFFER_SIZE I
+	public static final field DEFAULT_COMPRESSION_LEVEL I
+	public static final field NO_COMPRESSION_LEVEL I
 	public fun <init> ()V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;I)V
-	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;I)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun builder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public static final fun defaults ()Lorg/simplifiles/archive/ArchiveSaveOptions;
 	public final fun getBufferSize ()I
 	public final fun getCancellationToken ()Lorg/simplifiles/archive/CancellationToken;
+	public final fun getCompressionLevel ()I
+	public final fun getEntryFilter ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun getOverwritePolicy ()Lorg/simplifiles/files/OverwritePolicy;
 	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveSaveProgressListener;
 	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 }
@@ -255,6 +275,9 @@ public final class org/simplifiles/archive/ArchiveSaveOptions$Builder {
 	public final fun bufferSize (I)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun build ()Lorg/simplifiles/archive/ArchiveSaveOptions;
 	public final fun cancellationToken (Lorg/simplifiles/archive/CancellationToken;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun compressionLevel (I)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun entryFilter (Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun overwritePolicy (Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun progressListener (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 }
 

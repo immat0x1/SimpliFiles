@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-No changes yet.
+- Started `0.1.4-SNAPSHOT` development.
+- Added archive save overwrite policy, compression level, and entry filter options.
 
 ## 0.1.3
 

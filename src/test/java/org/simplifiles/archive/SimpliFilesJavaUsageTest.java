@@ -5,6 +5,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.simplifiles.SimpliFiles;
 import org.simplifiles.archive.security.DuplicatePolicy;
 import org.simplifiles.archive.security.SecurityPolicy;
+import org.simplifiles.files.OverwritePolicy;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,9 @@ class SimpliFilesJavaUsageTest {
         ArchiveSaveOptions saveOptions = ArchiveSaveOptions.builder()
                 .progressListener(progress -> savedEntries.set(progress.getEntriesProcessed()))
                 .bufferSize(16 * 1024)
+                .overwritePolicy(OverwritePolicy.ERROR)
+                .compressionLevel(ArchiveSaveOptions.BEST_SPEED_LEVEL)
+                .entryFilter(path -> !path.endsWith(".tmp"))
                 .build();
 
         ValidationReport report = SimpliFiles.archive(zip)

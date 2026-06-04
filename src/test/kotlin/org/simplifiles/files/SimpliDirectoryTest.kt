@@ -2,10 +2,12 @@ package org.simplifiles.files
 
 import org.junit.jupiter.api.io.TempDir
 import org.simplifiles.SimpliFiles
+import org.simplifiles.archive.ArchiveSaveOptions
 import org.simplifiles.exception.ArchiveWriteException
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.exception.UnsafePathException
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.test.Test
@@ -104,6 +106,46 @@ class SimpliDirectoryTest {
         assertFailsWith<ArchiveWriteException> {
             root.zipTo(root.file("nested.zip").file)
         }
+    }
+
+    @Test
+    fun `directory zip supports save options`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("reports/summary.txt").writeText("summary")
+        root.file("reports/debug.tmp").writeText("debug")
+        root.file("assets/logo.txt").writeText("logo")
+        val output = tempDir.resolve("workspace.zip")
+        Files.write(output, "old".toByteArray())
+
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.REPLACE)
+            .compressionLevel(ArchiveSaveOptions.NO_COMPRESSION_LEVEL)
+            .entryFilter { path -> !path.endsWith(".tmp") }
+            .build()
+
+        root.zipTo(output, options)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals("summary", zip.readText("reports/summary.txt"))
+            assertEquals("logo", zip.readText("assets/logo.txt"))
+            assertEquals(null, zip.getEntry("reports/debug.tmp"))
+        }
+    }
+
+    @Test
+    fun `directory zip can skip existing output`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("{}")
+        val output = tempDir.resolve("workspace.zip")
+        Files.write(output, "old".toByteArray())
+
+        val options = ArchiveSaveOptions.builder()
+            .overwritePolicy(OverwritePolicy.SKIP)
+            .build()
+
+        root.zipTo(output, options)
+
+        assertEquals("old", Files.readAllBytes(output).toString(Charsets.UTF_8))
     }
 
     @Test

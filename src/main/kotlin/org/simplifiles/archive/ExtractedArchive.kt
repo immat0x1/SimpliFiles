@@ -97,7 +97,7 @@ class ExtractedArchive internal constructor(
     /**
      * Saves the current extracted archive contents as a ZIP file.
      *
-     * The output file must not already exist and must be outside [root].
+     * By default, the output file must not already exist and must be outside [root].
      */
     fun saveAsZip(path: Path) {
         saveAsZip(path, ArchiveSaveOptions.defaults())
@@ -106,7 +106,7 @@ class ExtractedArchive internal constructor(
     /**
      * Saves the current extracted archive contents as a ZIP file.
      *
-     * The output file must not already exist and must be outside [root].
+     * By default, the output file must not already exist and must be outside [root].
      */
     fun saveAsZip(path: Path, options: ArchiveSaveOptions) {
         ZipArchiveWriter.write(root = root, output = path, options = options)

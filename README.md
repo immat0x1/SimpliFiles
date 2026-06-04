@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/immat0x1/SimpliFiles/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/immat0x1/SimpliFiles/ci.yml?branch=main&style=flat-square"></a>
-  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.3--SNAPSHOT-1684ff?style=flat-square"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.4--SNAPSHOT-1684ff?style=flat-square"></a>
   <img alt="Java" src="https://img.shields.io/badge/Java-17%2B-f89820?style=flat-square">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-JVM-7f52ff?style=flat-square">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-green?style=flat-square"></a>
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.immat0x1:simplifiles:0.1.3-SNAPSHOT")
+    implementation("io.github.immat0x1:simplifiles:0.1.4-SNAPSHOT")
 }
 ```
 
@@ -143,6 +143,21 @@ workspace.file("reports/summary.txt").writeTextAtomic("Processed 42 records.\n")
 workspace.file("reports/details.txt").writeText("Everything completed successfully.\n")
 
 val archive = workspace.zipTo("workspace.zip")
+```
+
+With save options:
+
+```kotlin
+import org.simplifiles.archive.ArchiveSaveOptions
+import org.simplifiles.files.OverwritePolicy
+
+val options = ArchiveSaveOptions.builder()
+    .overwritePolicy(OverwritePolicy.REPLACE)
+    .compressionLevel(ArchiveSaveOptions.BEST_SPEED_LEVEL)
+    .entryFilter { path -> !path.startsWith("tmp/") && !path.endsWith(".log") }
+    .build()
+
+workspace.zipTo("workspace.zip", options)
 ```
 
 ### Safe Child Paths
@@ -286,6 +301,7 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
 - Extraction cancellation tokens
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
+- Save overwrite policy, compression level, and entry filters
 - Glob search for extracted files
 - Save modified extracted contents back to ZIP
 

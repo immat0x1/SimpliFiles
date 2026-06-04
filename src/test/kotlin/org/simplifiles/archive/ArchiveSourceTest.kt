@@ -9,10 +9,12 @@ import org.simplifiles.exception.ArchiveWriteException
 import org.simplifiles.exception.ExtractionTargetException
 import org.simplifiles.exception.UnsafeArchivePathException
 import org.simplifiles.exception.UnsupportedArchiveFormatException
+import org.simplifiles.files.OverwritePolicy
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -424,6 +426,26 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `saveAsZip can replace existing output files`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val output = tempDir.resolve("existing.zip")
+        Files.writeString(output, "existing")
+
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
+            archive.saveAsZip(
+                output,
+                ArchiveSaveOptions.builder()
+                    .overwritePolicy(OverwritePolicy.REPLACE)
+                    .build(),
+            )
+        }
+
+        ZipFile(output.toFile()).use { repacked ->
+            assertEquals("hello", repacked.readText("file.txt"))
+        }
+    }
+
+    @Test
     fun `saveAsZip reports progress until completion`() {
         val zip = createZip("dir/file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("progress-save.zip")
@@ -523,6 +545,13 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `save options reject invalid compression level`() {
+        assertFailsWith<IllegalArgumentException> {
+            ArchiveSaveOptions(compressionLevel = 10)
+        }
+    }
+
+    @Test
     fun `saveAsZip rejects output inside extracted archive root`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
 
@@ -559,4 +588,9 @@ class ArchiveSourceTest {
 
         return zip
     }
+
+    private fun ZipFile.readText(path: String): String =
+        getInputStream(getEntry(path)).use { input ->
+            input.readBytes().toString(Charsets.UTF_8)
+        }
 }

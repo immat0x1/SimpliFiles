@@ -4,6 +4,7 @@ import org.simplifiles.archive.ArchiveSaveOptions
 import org.simplifiles.archive.ArchiveSaveProgress
 import org.simplifiles.exception.ArchiveOperationCanceledException
 import org.simplifiles.exception.ArchiveWriteException
+import org.simplifiles.files.OverwritePolicy
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
@@ -26,14 +27,24 @@ internal object ZipArchiveWriter {
             throw ArchiveWriteException(output, "output path must be outside source directory")
         }
 
+        checkCanceled(options)
+
         if (Files.exists(normalizedOutput)) {
-            throw ArchiveWriteException(output, "output file already exists")
+            when (options.overwritePolicy) {
+                OverwritePolicy.ERROR -> throw ArchiveWriteException(output, "output file already exists")
+                OverwritePolicy.SKIP -> return
+                OverwritePolicy.REPLACE -> {
+                    if (Files.isDirectory(normalizedOutput)) {
+                        throw ArchiveWriteException(output, "output path is a directory")
+                    }
+                    Files.delete(normalizedOutput)
+                }
+            }
         }
 
-        checkCanceled(options)
         normalizedOutput.parent?.let { Files.createDirectories(it) }
-        val directories = listDirectories(normalizedRoot)
-        val files = listFiles(normalizedRoot)
+        val directories = listDirectories(normalizedRoot, options)
+        val files = listFiles(normalizedRoot, options)
         val progress = SaveProgress(
             options = options,
             totalEntries = (directories.size + files.size).toLong(),
@@ -49,6 +60,7 @@ internal object ZipArchiveWriter {
                     StandardOpenOption.WRITE,
                 ),
             ).use { zip ->
+                zip.setLevel(options.compressionLevel)
                 writeDirectories(zip, normalizedRoot, directories, progress)
                 writeFiles(zip, normalizedRoot, files, progress, options.bufferSize)
             }
@@ -92,21 +104,34 @@ internal object ZipArchiveWriter {
         }
     }
 
-    private fun listDirectories(normalizedRoot: Path): List<Path> =
+    private fun listDirectories(
+        normalizedRoot: Path,
+        options: ArchiveSaveOptions,
+    ): List<Path> =
         Files.walk(normalizedRoot).use { stream ->
             stream.asSequence()
                 .filter { it != normalizedRoot && Files.isDirectory(it) }
+                .filter { options.entryFilter.include(entryPath(normalizedRoot, it) + "/") }
                 .sortedBy { normalizedRoot.relativize(it).toString() }
                 .toList()
         }
 
-    private fun listFiles(normalizedRoot: Path): List<Path> =
+    private fun listFiles(
+        normalizedRoot: Path,
+        options: ArchiveSaveOptions,
+    ): List<Path> =
         Files.walk(normalizedRoot).use { stream ->
             stream.asSequence()
                 .filter { Files.isRegularFile(it) }
+                .filter { options.entryFilter.include(entryPath(normalizedRoot, it)) }
                 .sortedBy { normalizedRoot.relativize(it).toString() }
                 .toList()
         }
+
+    private fun entryPath(
+        normalizedRoot: Path,
+        path: Path,
+    ): String = normalizedRoot.relativize(path).toString().replace('\\', '/')
 
     private fun copy(
         input: InputStream,
