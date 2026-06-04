@@ -77,6 +77,16 @@ class ZipArchiveEdgeCaseTest {
     }
 
     @Test
+    fun `validate rejects bare windows drive paths`() {
+        val zip = createZip("C:" to "payload".toByteArray())
+
+        val report = SimpliFiles.archive(zip).validate()
+
+        assertFalse(report.isSafe)
+        assertTrue(report.issues.any { it.code == "archive.entry.path.absolute" })
+    }
+
+    @Test
     fun `validate rejects empty entry names`() {
         val zip = createStoredZipAllowingDuplicateNames("" to "payload".toByteArray())
 
