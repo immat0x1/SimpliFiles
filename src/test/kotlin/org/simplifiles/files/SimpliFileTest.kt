@@ -6,6 +6,7 @@ import org.simplifiles.exception.FileOperationException
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
@@ -49,6 +50,51 @@ class SimpliFileTest {
     }
 
     @Test
+    fun `file can read and write bytes`() {
+        val file = SimpliFiles.file(tempDir.resolve("data/payload.bin"))
+        val bytes = byteArrayOf(0, 1, 2, 3, 127)
+
+        file.writeBytes(bytes)
+
+        assertTrue(file.exists())
+        assertEquals(bytes.size.toLong(), file.size)
+        assertContentEquals(bytes, file.readBytes())
+        assertContentEquals(bytes, file.readBytes(maxBytes = bytes.size.toLong()))
+    }
+
+    @Test
+    fun `file streams create parent directories and replace content`() {
+        val file = SimpliFiles.file(tempDir.resolve("streams/output.txt"))
+
+        file.outputStream().use { output ->
+            output.write("first".toByteArray())
+        }
+        file.outputStream().use { output ->
+            output.write("second".toByteArray())
+        }
+
+        val text = file.inputStream().use { input ->
+            input.readBytes().toString(Charsets.UTF_8)
+        }
+
+        assertEquals("second", text)
+    }
+
+    @Test
+    fun `file can write bytes atomically without explicit parent`() {
+        val file = SimpliFiles.file("root-atomic-${System.nanoTime()}.bin")
+        val bytes = byteArrayOf(9, 8, 7)
+
+        try {
+            file.writeBytesAtomic(bytes)
+
+            assertContentEquals(bytes, file.readBytes())
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
     fun `file can copy and move`() {
         val source = SimpliFiles.file(tempDir.resolve("source.txt"))
         source.writeText("hello")
@@ -69,6 +115,9 @@ class SimpliFileTest {
         assertEquals("hello", file.readText(maxBytes = 5))
         assertFailsWith<FileOperationException> {
             file.readBytes(maxBytes = 4)
+        }
+        assertFailsWith<IllegalArgumentException> {
+            file.readBytes(maxBytes = -1)
         }
     }
 

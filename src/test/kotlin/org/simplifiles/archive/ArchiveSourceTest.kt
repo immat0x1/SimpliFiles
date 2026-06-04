@@ -20,6 +20,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeBytes
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
@@ -366,6 +367,23 @@ class ArchiveSourceTest {
             newFile.writeText("created")
 
             assertEquals("created", newFile.readText())
+        }
+    }
+
+    @Test
+    fun `archive file exposes metadata bytes and streams`() {
+        val zip = createZip("data/payload.bin" to byteArrayOf(1, 2, 3, 4))
+
+        SimpliFiles.archive(zip).extractToTemp().use { archive ->
+            val file = archive.file("data/payload.bin")
+            val bytes = file.inputStream().use { input -> input.readBytes() }
+
+            assertTrue(file.exists())
+            assertTrue(file.exists)
+            assertEquals(4, file.size)
+            assertEquals("bin", file.extension)
+            assertContentEquals(byteArrayOf(1, 2, 3, 4), bytes)
+            assertContentEquals(byteArrayOf(1, 2, 3, 4), file.readBytes())
         }
     }
 
