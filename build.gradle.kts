@@ -10,6 +10,13 @@ val projectVersion = providers.fileContents(layout.projectDirectory.file("VERSIO
     .asText
     .map { it.trim() }
 
+fun hasGradleProperty(name: String): Boolean =
+    providers.gradleProperty(name).orNull?.isNotBlank() == true
+
+val hasSigningCredentials = hasGradleProperty("signingInMemoryKey") &&
+    hasGradleProperty("signingInMemoryKeyId") &&
+    hasGradleProperty("signingInMemoryKeyPassword")
+
 group = "io.github.immat0x1"
 version = projectVersion.get()
 
@@ -158,7 +165,9 @@ mavenPublishing {
     )
 
     publishToMavenCentral()
-    signAllPublications()
+    if (hasSigningCredentials) {
+        signAllPublications()
+    }
 
     pom {
         name.set("SimpliFiles")
