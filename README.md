@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/immat0x1/SimpliFiles/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/immat0x1/SimpliFiles/ci.yml?branch=main&style=flat-square"></a>
-  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.0--SNAPSHOT-1684ff?style=flat-square"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.3--SNAPSHOT-1684ff?style=flat-square"></a>
   <img alt="Java" src="https://img.shields.io/badge/Java-17%2B-f89820?style=flat-square">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-JVM-7f52ff?style=flat-square">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-green?style=flat-square"></a>
@@ -31,21 +31,40 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.immat0x1:simplifiles:0.1.0-SNAPSHOT")
+    implementation("io.github.immat0x1:simplifiles:0.1.3-SNAPSHOT")
 }
 ```
 
-Planned stable coordinate:
+Latest stable coordinate:
 
 ```kotlin
-implementation("io.github.immat0x1:simplifiles:0.1.3-SNAPSHOT")
+implementation("io.github.immat0x1:simplifiles:0.1.3")
 ```
 
 ## Requirements
 
-- Java 17+
+- Runtime: Java 8+ API surface
+- Build: Java 17 toolchain
 - Kotlin/JVM
 - Archive module currently supports ZIP
+
+## Why SimpliFiles
+
+Working with files and archives in Java/Kotlin is powerful, but the safe version of simple tasks often turns into repetitive infrastructure code. Extracting a ZIP means validating paths, creating directories, copying streams, handling duplicate entries, checking sizes, cleaning partial output, and only then reading the files you actually needed.
+
+SimpliFiles was created to make those workflows short by default and safer by default.
+
+| Common pain | Standard API reality | SimpliFiles approach |
+| --- | --- | --- |
+| Extracting archives takes too much boilerplate | You manually iterate entries, normalize paths, create directories, copy streams, and close resources | `SimpliFiles.archive(path).extractTo(...)` validates and extracts with a focused API |
+| Archive extraction is easy to make unsafe | Zip Slip, absolute paths, duplicate paths, oversized entries, and zip bombs are easy to miss | Strict `SecurityPolicy` is applied before extraction and while bytes are written |
+| You only get files on disk after extraction | The caller has to rebuild convenience helpers around the output directory | `ExtractedArchive`, `ArchiveFile`, and `ArchiveDirectory` provide handles for reading, editing, deleting, moving, and saving |
+| Reading user-controlled files can accidentally load too much | `readText()` and `readBytes()` have no built-in limit | Bounded reads make limits explicit: `readText(maxBytes = ...)` |
+| Updating small metadata files is awkward to do safely | Direct writes can leave half-written files after failures | `writeTextAtomic(...)` writes through a temporary file and swaps it into place |
+| Repacking or creating ZIP files is verbose | You manually build `ZipOutputStream` and preserve directory entries yourself | `saveAsZip(...)` and `SimpliDirectory.zipTo(...)` create ZIP output from high-level handles |
+| Java and Android integrations often still need `File` | Code has to bounce between `Path`, `File`, and custom checks | `SimpliFile.file` and `SimpliDirectory.file` expose Java `File` views without pushing NIO details into app code |
+
+The library is archive-first, not archive-only. The same entry point also exposes regular file and directory helpers for common filesystem workflows.
 
 ## Quick Start
 

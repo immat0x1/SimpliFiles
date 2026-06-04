@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+No changes yet.
+
+## 0.1.3
+
 - Added Gradle/Kotlin JVM project setup.
 - Added ZIP format detection, inspection, and validation.
 - Added strict archive security policy defaults.
@@ -15,7 +19,10 @@
 - Added configurable buffer size for ZIP extraction.
 - Added save progress callbacks, cancellation tokens, and configurable buffer size for ZIP repacking.
 - Added dry-run extraction plans.
+- Added Android runtime compatibility hardening for public file and archive APIs.
+- Added Java `File` views for `SimpliFile` and `SimpliDirectory`.
+- Added `SimpliDirectory.zipTo(...)` for creating ZIP files from directories.
 
-## 0.1.0-SNAPSHOT
+## 0.1.2
 
-Initial development version.
+Published stable release.
