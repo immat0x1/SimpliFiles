@@ -17,6 +17,17 @@ import java.nio.file.StandardOpenOption
 class SimpliFile internal constructor(
     val path: Path,
 ) {
+    /**
+     * Java [File] view of this file handle.
+     */
+    val file: File
+        get() = File(path.toString())
+
+    /**
+     * Java-friendly equivalent of the [file] property.
+     */
+    fun toFile(): File = file
+
     val exists: Boolean
         get() = Files.exists(path)
 
@@ -164,12 +175,12 @@ class SimpliFile internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliFile = copyTo(Paths.get(target), overwritePolicy)
 
-    fun copyTo(target: File): SimpliFile = copyTo(target.toPath())
+    fun copyTo(target: File): SimpliFile = copyTo(Paths.get(target.path))
 
     fun copyTo(
         target: File,
         overwritePolicy: OverwritePolicy,
-    ): SimpliFile = copyTo(target.toPath(), overwritePolicy)
+    ): SimpliFile = copyTo(Paths.get(target.path), overwritePolicy)
 
     fun moveTo(target: Path): SimpliFile = moveTo(target, OverwritePolicy.REPLACE)
 
@@ -203,10 +214,10 @@ class SimpliFile internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliFile = moveTo(Paths.get(target), overwritePolicy)
 
-    fun moveTo(target: File): SimpliFile = moveTo(target.toPath())
+    fun moveTo(target: File): SimpliFile = moveTo(Paths.get(target.path))
 
     fun moveTo(
         target: File,
         overwritePolicy: OverwritePolicy,
-    ): SimpliFile = moveTo(target.toPath(), overwritePolicy)
+    ): SimpliFile = moveTo(Paths.get(target.path), overwritePolicy)
 }

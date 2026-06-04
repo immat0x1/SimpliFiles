@@ -31,6 +31,15 @@ class SimpliFileTest {
     }
 
     @Test
+    fun `file exposes java file view`() {
+        val javaFile = tempDir.resolve("config/app.json").toFile()
+        val file = SimpliFiles.file(javaFile)
+
+        assertEquals(javaFile.path, file.file.path)
+        assertEquals(javaFile.path, file.toFile().path)
+    }
+
+    @Test
     fun `file can write atomically`() {
         val file = SimpliFiles.file(tempDir.resolve("metadata.json"))
 

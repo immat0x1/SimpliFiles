@@ -27,7 +27,7 @@ object SimpliFiles {
      * Creates an archive source from a Java [File].
      */
     @JvmStatic
-    fun archive(file: File): ArchiveSource = archive(file.toPath())
+    fun archive(file: File): ArchiveSource = archive(Paths.get(file.path))
 
     /**
      * Creates a file handle from a filesystem path.
@@ -45,7 +45,7 @@ object SimpliFiles {
      * Creates a file handle from a Java [File].
      */
     @JvmStatic
-    fun file(file: File): SimpliFile = file(file.toPath())
+    fun file(file: File): SimpliFile = file(Paths.get(file.path))
 
     /**
      * Creates a directory handle from a filesystem path.
@@ -63,5 +63,5 @@ object SimpliFiles {
      * Creates a directory handle from a Java [File].
      */
     @JvmStatic
-    fun directory(file: File): SimpliDirectory = directory(file.toPath())
+    fun directory(file: File): SimpliDirectory = directory(Paths.get(file.path))
 }

@@ -17,6 +17,17 @@ import kotlin.streams.asSequence
 class SimpliDirectory internal constructor(
     val path: Path,
 ) {
+    /**
+     * Java [File] view of this directory handle.
+     */
+    val file: File
+        get() = File(path.toString())
+
+    /**
+     * Java-friendly equivalent of the [file] property.
+     */
+    fun toFile(): File = file
+
     val exists: Boolean
         get() = Files.isDirectory(path)
 
@@ -121,12 +132,12 @@ class SimpliDirectory internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = copyTo(Paths.get(target), overwritePolicy)
 
-    fun copyTo(target: File): SimpliDirectory = copyTo(target.toPath())
+    fun copyTo(target: File): SimpliDirectory = copyTo(Paths.get(target.path))
 
     fun copyTo(
         target: File,
         overwritePolicy: OverwritePolicy,
-    ): SimpliDirectory = copyTo(target.toPath(), overwritePolicy)
+    ): SimpliDirectory = copyTo(Paths.get(target.path), overwritePolicy)
 
     fun moveTo(target: Path): SimpliDirectory = moveTo(target, OverwritePolicy.REPLACE)
 
@@ -158,10 +169,10 @@ class SimpliDirectory internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = moveTo(Paths.get(target), overwritePolicy)
 
-    fun moveTo(target: File): SimpliDirectory = moveTo(target.toPath())
+    fun moveTo(target: File): SimpliDirectory = moveTo(Paths.get(target.path))
 
     fun moveTo(
         target: File,
         overwritePolicy: OverwritePolicy,
-    ): SimpliDirectory = moveTo(target.toPath(), overwritePolicy)
+    ): SimpliDirectory = moveTo(Paths.get(target.path), overwritePolicy)
 }

@@ -498,6 +498,7 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun file (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public final fun getDirectories ()Ljava/util/List;
 	public final fun getExists ()Z
+	public final fun getFile ()Ljava/io/File;
 	public final fun getFiles ()Ljava/util/List;
 	public final fun getPath ()Ljava/nio/file/Path;
 	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
@@ -507,6 +508,7 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun moveTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun moveTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun resolveInside (Ljava/lang/String;)Ljava/nio/file/Path;
+	public final fun toFile ()Ljava/io/File;
 	public final fun walkFiles ()Ljava/util/List;
 }
 
@@ -524,6 +526,7 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun exists ()Z
 	public final fun getExists ()Z
 	public final fun getExtension ()Ljava/lang/String;
+	public final fun getFile ()Ljava/io/File;
 	public final fun getPath ()Ljava/nio/file/Path;
 	public final fun getSize ()J
 	public final fun inputStream ()Ljava/io/InputStream;
@@ -542,6 +545,7 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun readText (Ljava/nio/charset/Charset;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun toFile ()Ljava/io/File;
 	public final fun writeBytes ([B)V
 	public final fun writeBytesAtomic ([B)V
 	public final fun writeText (Ljava/lang/String;)V

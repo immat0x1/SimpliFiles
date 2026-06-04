@@ -4,6 +4,7 @@ import org.junit.jupiter.api.io.TempDir
 import org.simplifiles.SimpliFiles
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.exception.UnsafePathException
+import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,6 +31,16 @@ class SimpliDirectoryTest {
             listOf("icons/edit.svg", "metadata.json"),
             root.walkFiles().map { tempDir.relativize(it.path).toString().replace('\\', '/') }.sorted(),
         )
+    }
+
+    @Test
+    fun `directory exposes java file view`() {
+        val javaDirectory = tempDir.resolve("pack").toFile()
+        val directory = SimpliFiles.directory(javaDirectory)
+
+        assertEquals(javaDirectory.path, directory.file.path)
+        assertEquals(javaDirectory.path, directory.toFile().path)
+        assertEquals(File(javaDirectory, "metadata.json").path, directory.file("metadata.json").file.path)
     }
 
     @Test
