@@ -13,6 +13,7 @@ import org.simplifiles.internal.io.FileTreeCleaner
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 /**
  * Configurable archive input.
@@ -96,7 +97,7 @@ class ArchiveSource internal constructor(
     }
 
     fun planExtractionTo(path: String): ArchiveExtractionPlan =
-        planExtractionTo(Path.of(path))
+        planExtractionTo(Paths.get(path))
 
     fun planExtractionTo(file: File): ArchiveExtractionPlan =
         planExtractionTo(file.toPath())
@@ -136,10 +137,10 @@ class ArchiveSource internal constructor(
         }
     }
 
-    fun extractTo(path: String): ExtractedArchive = extractTo(Path.of(path))
+    fun extractTo(path: String): ExtractedArchive = extractTo(Paths.get(path))
 
     fun extractTo(path: String, options: ArchiveExtractionOptions): ExtractedArchive =
-        extractTo(Path.of(path), options)
+        extractTo(Paths.get(path), options)
 
     fun extractTo(file: File): ExtractedArchive = extractTo(file.toPath())
 

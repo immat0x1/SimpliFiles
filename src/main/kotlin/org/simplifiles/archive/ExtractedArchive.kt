@@ -7,6 +7,7 @@ import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.streams.asSequence
 
 /**
@@ -89,7 +90,7 @@ class ExtractedArchive internal constructor(
         val matcher = FileSystems.getDefault().getPathMatcher("glob:$glob")
 
         return files.filter { file ->
-            matcher.matches(Path.of(file.path))
+            matcher.matches(Paths.get(file.path))
         }
     }
 
@@ -112,11 +113,11 @@ class ExtractedArchive internal constructor(
     }
 
     fun saveAsZip(path: String) {
-        saveAsZip(Path.of(path))
+        saveAsZip(Paths.get(path))
     }
 
     fun saveAsZip(path: String, options: ArchiveSaveOptions) {
-        saveAsZip(Path.of(path), options)
+        saveAsZip(Paths.get(path), options)
     }
 
     fun saveAsZip(file: File) {

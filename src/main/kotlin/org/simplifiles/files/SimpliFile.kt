@@ -7,6 +7,7 @@ import java.io.OutputStream
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 
@@ -53,7 +54,7 @@ class SimpliFile internal constructor(
     }
 
     @JvmOverloads
-    fun readText(charset: Charset = Charsets.UTF_8): String = Files.readString(path, charset)
+    fun readText(charset: Charset = Charsets.UTF_8): String = readBytes().toString(charset)
 
     @JvmOverloads
     fun readText(
@@ -78,10 +79,9 @@ class SimpliFile internal constructor(
         charset: Charset = Charsets.UTF_8,
     ) {
         path.parent?.let(Files::createDirectories)
-        Files.writeString(
+        Files.write(
             path,
-            text,
-            charset,
+            text.toByteArray(charset),
             StandardOpenOption.CREATE,
             StandardOpenOption.TRUNCATE_EXISTING,
             StandardOpenOption.WRITE,
@@ -94,10 +94,9 @@ class SimpliFile internal constructor(
         charset: Charset = Charsets.UTF_8,
     ) {
         path.parent?.let(Files::createDirectories)
-        Files.writeString(
+        Files.write(
             path,
-            text,
-            charset,
+            text.toByteArray(charset),
             StandardOpenOption.CREATE,
             StandardOpenOption.APPEND,
             StandardOpenOption.WRITE,
@@ -113,7 +112,7 @@ class SimpliFile internal constructor(
     }
 
     fun writeBytesAtomic(bytes: ByteArray) {
-        val parent = path.parent ?: Path.of(".").toAbsolutePath().normalize()
+        val parent = path.parent ?: Paths.get(".").toAbsolutePath().normalize()
         Files.createDirectories(parent)
 
         val fileName = path.fileName?.toString() ?: throw FileOperationException("File path must include a file name.")
@@ -158,12 +157,12 @@ class SimpliFile internal constructor(
         return SimpliFile(target)
     }
 
-    fun copyTo(target: String): SimpliFile = copyTo(Path.of(target))
+    fun copyTo(target: String): SimpliFile = copyTo(Paths.get(target))
 
     fun copyTo(
         target: String,
         overwritePolicy: OverwritePolicy,
-    ): SimpliFile = copyTo(Path.of(target), overwritePolicy)
+    ): SimpliFile = copyTo(Paths.get(target), overwritePolicy)
 
     fun copyTo(target: File): SimpliFile = copyTo(target.toPath())
 
@@ -197,12 +196,12 @@ class SimpliFile internal constructor(
         return SimpliFile(target)
     }
 
-    fun moveTo(target: String): SimpliFile = moveTo(Path.of(target))
+    fun moveTo(target: String): SimpliFile = moveTo(Paths.get(target))
 
     fun moveTo(
         target: String,
         overwritePolicy: OverwritePolicy,
-    ): SimpliFile = moveTo(Path.of(target), overwritePolicy)
+    ): SimpliFile = moveTo(Paths.get(target), overwritePolicy)
 
     fun moveTo(target: File): SimpliFile = moveTo(target.toPath())
 

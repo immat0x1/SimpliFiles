@@ -2,6 +2,7 @@ package org.simplifiles.internal.files
 
 import org.simplifiles.exception.UnsafePathException
 import java.nio.file.Path
+import java.nio.file.Paths
 
 internal object SafePathResolver {
     fun resolveInside(
@@ -20,7 +21,7 @@ internal object SafePathResolver {
             throw UnsafePathException(path, "path must not contain parent traversal")
         }
 
-        val child = Path.of(path)
+        val child = Paths.get(path)
         if (child.isAbsolute) {
             throw UnsafePathException(path, "path must be relative")
         }

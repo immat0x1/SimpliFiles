@@ -46,7 +46,7 @@ class ArchiveFile internal constructor(
      * Reads this file as text.
      */
     @JvmOverloads
-    fun readText(charset: Charset = Charsets.UTF_8): String = Files.readString(absolutePath, charset)
+    fun readText(charset: Charset = Charsets.UTF_8): String = readBytes().toString(charset)
 
     /**
      * Replaces this file with the given text, creating parent directories if needed.
@@ -57,10 +57,9 @@ class ArchiveFile internal constructor(
         charset: Charset = Charsets.UTF_8,
     ) {
         Files.createDirectories(absolutePath.parent)
-        Files.writeString(
+        Files.write(
             absolutePath,
-            text,
-            charset,
+            text.toByteArray(charset),
             StandardOpenOption.CREATE,
             StandardOpenOption.TRUNCATE_EXISTING,
             StandardOpenOption.WRITE,
@@ -76,10 +75,9 @@ class ArchiveFile internal constructor(
         charset: Charset = Charsets.UTF_8,
     ) {
         Files.createDirectories(absolutePath.parent)
-        Files.writeString(
+        Files.write(
             absolutePath,
-            text,
-            charset,
+            text.toByteArray(charset),
             StandardOpenOption.CREATE,
             StandardOpenOption.APPEND,
             StandardOpenOption.WRITE,

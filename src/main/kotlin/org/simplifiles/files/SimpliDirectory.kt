@@ -7,6 +7,7 @@ import org.simplifiles.internal.io.FileTreeCopier
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
@@ -113,12 +114,12 @@ class SimpliDirectory internal constructor(
         return SimpliDirectory(target)
     }
 
-    fun copyTo(target: String): SimpliDirectory = copyTo(Path.of(target))
+    fun copyTo(target: String): SimpliDirectory = copyTo(Paths.get(target))
 
     fun copyTo(
         target: String,
         overwritePolicy: OverwritePolicy,
-    ): SimpliDirectory = copyTo(Path.of(target), overwritePolicy)
+    ): SimpliDirectory = copyTo(Paths.get(target), overwritePolicy)
 
     fun copyTo(target: File): SimpliDirectory = copyTo(target.toPath())
 
@@ -150,12 +151,12 @@ class SimpliDirectory internal constructor(
         return SimpliDirectory(target)
     }
 
-    fun moveTo(target: String): SimpliDirectory = moveTo(Path.of(target))
+    fun moveTo(target: String): SimpliDirectory = moveTo(Paths.get(target))
 
     fun moveTo(
         target: String,
         overwritePolicy: OverwritePolicy,
-    ): SimpliDirectory = moveTo(Path.of(target), overwritePolicy)
+    ): SimpliDirectory = moveTo(Paths.get(target), overwritePolicy)
 
     fun moveTo(target: File): SimpliDirectory = moveTo(target.toPath())
 

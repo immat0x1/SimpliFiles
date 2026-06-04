@@ -74,7 +74,7 @@ internal object ZipArchiveExtractor {
     }
 
     private fun isDirectoryEmpty(root: Path): Boolean =
-        Files.list(root).use { stream -> stream.findAny().isEmpty }
+        Files.list(root).use { stream -> !stream.findAny().isPresent }
 
     private fun extractEntries(
         source: Path,

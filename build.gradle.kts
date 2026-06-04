@@ -28,6 +28,19 @@ kotlin {
     }
 }
 
+tasks.named<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>("compileKotlin") {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        freeCompilerArgs.add("-Xjdk-release=8")
+    }
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    options.release.set(8)
+}
+
 val mainSourceSet = sourceSets.named("main").get()
 val jmhSourceSet = sourceSets.create("jmh") {
     java.srcDir("src/jmh/java")
