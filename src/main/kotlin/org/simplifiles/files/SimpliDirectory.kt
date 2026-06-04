@@ -1,6 +1,8 @@
 package org.simplifiles.files
 
 import org.simplifiles.exception.FileOperationException
+import org.simplifiles.archive.ArchiveSaveOptions
+import org.simplifiles.internal.archive.zip.ZipArchiveWriter
 import org.simplifiles.internal.files.SafePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
 import org.simplifiles.internal.io.FileTreeCopier
@@ -102,6 +104,34 @@ class SimpliDirectory internal constructor(
                 .toList()
         }
     }
+
+    fun zipTo(target: Path): SimpliFile = zipTo(target, ArchiveSaveOptions.defaults())
+
+    fun zipTo(
+        target: Path,
+        options: ArchiveSaveOptions,
+    ): SimpliFile {
+        if (!exists) {
+            throw FileOperationException("Directory does not exist: $path")
+        }
+
+        ZipArchiveWriter.write(root = path, output = target, options = options)
+        return SimpliFile(target)
+    }
+
+    fun zipTo(target: String): SimpliFile = zipTo(Paths.get(target))
+
+    fun zipTo(
+        target: String,
+        options: ArchiveSaveOptions,
+    ): SimpliFile = zipTo(Paths.get(target), options)
+
+    fun zipTo(target: File): SimpliFile = zipTo(Paths.get(target.path))
+
+    fun zipTo(
+        target: File,
+        options: ArchiveSaveOptions,
+    ): SimpliFile = zipTo(Paths.get(target.path), options)
 
     fun copyTo(target: Path): SimpliDirectory = copyTo(target, OverwritePolicy.REPLACE)
 

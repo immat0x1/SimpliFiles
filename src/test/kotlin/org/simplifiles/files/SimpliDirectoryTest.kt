@@ -2,10 +2,12 @@ package org.simplifiles.files
 
 import org.junit.jupiter.api.io.TempDir
 import org.simplifiles.SimpliFiles
+import org.simplifiles.exception.ArchiveWriteException
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.exception.UnsafePathException
 import java.io.File
 import java.nio.file.Path
+import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -20,27 +22,27 @@ class SimpliDirectoryTest {
     fun `directory resolves children safely`() {
         val root = SimpliFiles.directory(tempDir).create()
 
-        root.file("metadata.json").writeTextAtomic("{}")
-        root.directory("icons").create()
-        root.file("icons/edit.svg").writeText("<svg/>")
+        root.file("config.json").writeTextAtomic("{}")
+        root.directory("reports").create()
+        root.file("reports/summary.txt").writeText("summary")
 
-        assertEquals(tempDir.resolve("icons/edit.svg"), root.resolveInside("icons/edit.svg"))
-        assertEquals(listOf("metadata.json"), root.files.map { it.path.fileName.toString() })
-        assertEquals(listOf("icons"), root.directories.map { it.path.fileName.toString() })
+        assertEquals(tempDir.resolve("reports/summary.txt"), root.resolveInside("reports/summary.txt"))
+        assertEquals(listOf("config.json"), root.files.map { it.path.fileName.toString() })
+        assertEquals(listOf("reports"), root.directories.map { it.path.fileName.toString() })
         assertEquals(
-            listOf("icons/edit.svg", "metadata.json"),
+            listOf("config.json", "reports/summary.txt"),
             root.walkFiles().map { tempDir.relativize(it.path).toString().replace('\\', '/') }.sorted(),
         )
     }
 
     @Test
     fun `directory exposes java file view`() {
-        val javaDirectory = tempDir.resolve("pack").toFile()
+        val javaDirectory = tempDir.resolve("workspace").toFile()
         val directory = SimpliFiles.directory(javaDirectory)
 
         assertEquals(javaDirectory.path, directory.file.path)
         assertEquals(javaDirectory.path, directory.toFile().path)
-        assertEquals(File(javaDirectory, "metadata.json").path, directory.file("metadata.json").file.path)
+        assertEquals(File(javaDirectory, "config.json").path, directory.file("config.json").file.path)
     }
 
     @Test
@@ -51,7 +53,7 @@ class SimpliDirectoryTest {
             root.file("../outside.txt")
         }
         assertFailsWith<UnsafePathException> {
-            root.file("icons/../metadata.json")
+            root.file("reports/../config.json")
         }
         assertFailsWith<UnsafePathException> {
             root.directory("/absolute")
@@ -63,18 +65,45 @@ class SimpliDirectoryTest {
 
     @Test
     fun `directory can copy move and delete recursively`() {
-        val root = SimpliFiles.directory(tempDir.resolve("pack")).create()
-        root.file("icons/edit.svg").writeText("<svg/>")
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("reports/summary.txt").writeText("summary")
 
-        val copied = root.copyTo(tempDir.resolve("pack-copy"))
-        assertEquals("<svg/>", copied.file("icons/edit.svg").readText())
+        val copied = root.copyTo(tempDir.resolve("workspace-copy"))
+        assertEquals("summary", copied.file("reports/summary.txt").readText())
 
-        val moved = copied.moveTo(tempDir.resolve("pack-moved"))
-        assertEquals("<svg/>", moved.file("icons/edit.svg").readText())
+        val moved = copied.moveTo(tempDir.resolve("workspace-moved"))
+        assertEquals("summary", moved.file("reports/summary.txt").readText())
         assertFalse(copied.exists)
 
         assertTrue(moved.deleteRecursively())
         assertFalse(moved.exists)
+    }
+
+    @Test
+    fun `directory can be zipped`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("""{"enabled":true}""")
+        root.file("reports/summary.txt").writeText("summary")
+        root.directory("empty").create()
+
+        val output = root.zipTo(tempDir.resolve("workspace.zip"))
+
+        assertTrue(output.exists)
+        ZipFile(output.file).use { zip ->
+            assertEquals("""{"enabled":true}""", zip.readText("config.json"))
+            assertEquals("summary", zip.readText("reports/summary.txt"))
+            assertTrue(zip.getEntry("empty/").isDirectory)
+        }
+    }
+
+    @Test
+    fun `directory zip rejects output inside source directory`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("{}")
+
+        assertFailsWith<ArchiveWriteException> {
+            root.zipTo(root.file("nested.zip").file)
+        }
     }
 
     @Test
@@ -105,13 +134,18 @@ class SimpliDirectoryTest {
 
     @Test
     fun `directory rejects copy and move into itself`() {
-        val root = SimpliFiles.directory(tempDir.resolve("pack")).create()
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
 
         assertFailsWith<FileOperationException> {
-            root.copyTo(tempDir.resolve("pack/nested"))
+            root.copyTo(tempDir.resolve("workspace/nested"))
         }
         assertFailsWith<FileOperationException> {
-            root.moveTo(tempDir.resolve("pack/nested"))
+            root.moveTo(tempDir.resolve("workspace/nested"))
         }
     }
+
+    private fun ZipFile.readText(path: String): String =
+        getInputStream(getEntry(path)).use { input ->
+            input.readBytes().toString(Charsets.UTF_8)
+        }
 }

@@ -23,7 +23,7 @@ internal object ZipArchiveWriter {
         val normalizedOutput = output.toAbsolutePath().normalize()
 
         if (normalizedOutput.startsWith(normalizedRoot)) {
-            throw ArchiveWriteException(output, "output path must be outside extracted archive root")
+            throw ArchiveWriteException(output, "output path must be outside source directory")
         }
 
         if (Files.exists(normalizedOutput)) {

@@ -510,6 +510,12 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun resolveInside (Ljava/lang/String;)Ljava/nio/file/Path;
 	public final fun toFile ()Ljava/io/File;
 	public final fun walkFiles ()Ljava/util/List;
+	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/files/SimpliFile {

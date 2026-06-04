@@ -38,7 +38,7 @@ dependencies {
 Planned stable coordinate:
 
 ```kotlin
-implementation("io.github.immat0x1:simplifiles:0.1.0")
+implementation("io.github.immat0x1:simplifiles:0.1.3-SNAPSHOT")
 ```
 
 ## Requirements
@@ -114,6 +114,17 @@ Policies:
 - `SKIP` leaves the target unchanged
 
 ## Directory Recipes
+
+### Zip a Directory
+
+```kotlin
+val workspace = SimpliFiles.directory("workspace").create()
+
+workspace.file("reports/summary.txt").writeTextAtomic("Processed 42 records.\n")
+workspace.file("reports/details.txt").writeText("Everything completed successfully.\n")
+
+val archive = workspace.zipTo("workspace.zip")
+```
 
 ### Safe Child Paths
 
