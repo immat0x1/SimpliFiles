@@ -1,6 +1,7 @@
 package org.simplifiles
 
 import org.simplifiles.archive.ArchiveSource
+import org.simplifiles.archive.ArchivePack
 import org.simplifiles.files.SimpliDirectory
 import org.simplifiles.files.SimpliFile
 import java.io.File
@@ -28,6 +29,12 @@ object SimpliFiles {
      */
     @JvmStatic
     fun archive(file: File): ArchiveSource = archive(Paths.get(file.path))
+
+    /**
+     * Creates a pack builder for writing ZIP archives from independent files and directories.
+     */
+    @JvmStatic
+    fun pack(): ArchivePack = ArchivePack()
 
     /**
      * Creates a file handle from a filesystem path.

@@ -6,6 +6,7 @@
 - Added archive save overwrite policy, compression level, and entry filter options.
 - Added composable `ArchiveEntryFilter` helpers.
 - Added directory transfer options with `DirectoryOverwritePolicy.MERGE`, file-count limits, byte limits, and `SimpliDirectory.clean()`.
+- Added `SimpliFiles.pack()` for creating ZIP archives from independent files and directories.
 - Improved `REPLACE` archive saves so existing output is preserved until the new archive is written successfully.
 - Improved archive path inspection and validation performance by reducing per-entry allocations.
 

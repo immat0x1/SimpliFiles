@@ -166,6 +166,17 @@ val options = ArchiveSaveOptions.builder()
 workspace.zipTo("workspace.zip", options)
 ```
 
+### Pack Files and Directories
+
+Use `SimpliFiles.pack()` when the archive should be assembled from independent files or directories without first copying them into a staging directory.
+
+```kotlin
+val archive = SimpliFiles.pack()
+    .addFile("README.md", "docs/README.md")
+    .addDirectory("assets", "public/assets")
+    .zipTo("bundle.zip")
+```
+
 ### Safe Child Paths
 
 `resolveInside` rejects absolute paths and parent traversal before returning a normalized path inside the directory root.
@@ -331,6 +342,7 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
 - Save overwrite policy, compression level, and entry filters
+- ZIP creation from independent files and directories with `SimpliFiles.pack()`
 - JMH benchmarks against direct Java ZIP baselines
 - Glob search for extracted files
 - Save modified extracted contents back to ZIP

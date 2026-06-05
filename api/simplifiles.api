@@ -9,6 +9,7 @@ public final class org/simplifiles/SimpliFiles {
 	public static final fun file (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public static final fun file (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public static final fun file (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public static final fun pack ()Lorg/simplifiles/archive/ArchivePack;
 }
 
 public final class org/simplifiles/archive/ArchiveDirectory {
@@ -192,6 +193,27 @@ public final class org/simplifiles/archive/ArchiveIssueSeverity : java/lang/Enum
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveIssueSeverity;
 	public static fun values ()[Lorg/simplifiles/archive/ArchiveIssueSeverity;
+}
+
+public final class org/simplifiles/archive/ArchivePack {
+	public final fun addDirectory (Ljava/io/File;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addDirectory (Ljava/io/File;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addDirectory (Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addDirectory (Ljava/lang/String;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addDirectory (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addDirectory (Ljava/nio/file/Path;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/io/File;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/io/File;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/lang/String;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun addFile (Ljava/nio/file/Path;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
+	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/archive/ArchivePlannedAction : java/lang/Enum {
