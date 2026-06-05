@@ -75,7 +75,9 @@ class ArchiveDirectoryTest {
             assertTrue(archive.directory("reports").deleteRecursively())
             assertFalse(archive.directory("reports").exists)
 
-            archive.saveAsZip(repacked)
+            val output = archive.zipTo(repacked)
+            assertEquals(repacked, output.path)
+            assertTrue(output.exists)
         }
 
         SimpliFiles.archive(repacked).extractToTemp().use { archive ->
@@ -86,13 +88,13 @@ class ArchiveDirectoryTest {
     }
 
     @Test
-    fun `saveAsZip preserves empty directories`() {
+    fun `zipTo preserves empty directories`() {
         val zip = createZip("input/seed.txt" to "seed".toByteArray())
         val repacked = tempDir.resolve("empty-directories.zip")
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             archive.directory("empty/reports").create()
-            archive.saveAsZip(repacked)
+            archive.zipTo(repacked)
         }
 
         SimpliFiles.archive(repacked).extractToTemp().use { archive ->

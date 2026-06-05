@@ -61,7 +61,7 @@ SimpliFiles was created to make those workflows short by default and safer by de
 | You only get files on disk after extraction | The caller has to rebuild convenience helpers around the output directory | `ExtractedArchive`, `ArchiveFile`, and `ArchiveDirectory` provide handles for reading, editing, deleting, moving, and saving |
 | Reading user-controlled files can accidentally load too much | `readText()` and `readBytes()` have no built-in limit | Bounded reads make limits explicit: `readText(maxBytes = ...)` |
 | Updating small metadata files is awkward to do safely | Direct writes can leave half-written files after failures | `writeTextAtomic(...)` writes through a temporary file and swaps it into place |
-| Repacking or creating ZIP files is verbose | You manually build `ZipOutputStream` and preserve directory entries yourself | `saveAsZip(...)` and `SimpliDirectory.zipTo(...)` create ZIP output from high-level handles |
+| Repacking or creating ZIP files is verbose | You manually build `ZipOutputStream` and preserve directory entries yourself | `ExtractedArchive.zipTo(...)`, `SimpliDirectory.zipTo(...)`, and `SimpliFiles.pack()` create ZIP output from high-level handles |
 | Java and Android integrations often still need `File` | Code has to bounce between `Path`, `File`, and custom checks | `SimpliFile.file` and `SimpliDirectory.file` expose Java `File` views without pushing NIO details into app code |
 
 The library is archive-first, not archive-only. The same entry point also exposes regular file and directory helpers for common filesystem workflows.
@@ -267,7 +267,7 @@ SimpliFiles.archive("bundle.zip")
 
         archive.file("processed.txt").writeText(manifest)
         archive.find("**/*.tmp").forEach { it.delete() }
-        archive.saveAsZip("bundle-clean.zip")
+        archive.zipTo("bundle-clean.zip")
     }
 ```
 
@@ -320,7 +320,7 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
         .withPolicy(SecurityPolicy.strict())
         .extractToTemp()) {
     archive.file("summary.txt").writeText(metadata);
-    archive.saveAsZip("bundle-updated.zip");
+    archive.zipTo("bundle-updated.zip");
 }
 ```
 

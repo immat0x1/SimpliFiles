@@ -181,7 +181,7 @@ class ArchiveSourceTest {
 
         SimpliFiles.archive(zip.toFile()).extractTo(target).use { archive ->
             assertEquals("hello", archive.file("file.txt").readText())
-            archive.saveAsZip(repacked)
+            archive.zipTo(repacked)
         }
 
         SimpliFiles.archive(repacked).extractToTemp().use { archive ->
@@ -444,7 +444,7 @@ class ArchiveSourceTest {
                 textFiles,
             )
 
-            archive.saveAsZip(repacked)
+            archive.zipTo(repacked)
         }
 
         SimpliFiles.archive(repacked).extractToTemp().use { archive ->
@@ -457,14 +457,14 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip rejects existing output files`() {
+    fun `zipTo rejects existing output files`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("existing.zip")
         Files.writeString(output, "existing")
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<ArchiveWriteException> {
-                archive.saveAsZip(output)
+                archive.zipTo(output)
             }
         }
 
@@ -472,13 +472,13 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip can replace existing output files`() {
+    fun `zipTo can replace existing output files`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("existing.zip")
         Files.writeString(output, "existing")
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
-            archive.saveAsZip(
+            archive.zipTo(
                 output,
                 ArchiveSaveOptions.builder()
                     .overwritePolicy(OverwritePolicy.REPLACE)
@@ -492,7 +492,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip reports progress until completion`() {
+    fun `zipTo reports progress until completion`() {
         val zip = createZip("dir/file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("progress-save.zip")
         val progressEvents = mutableListOf<ArchiveSaveProgress>()
@@ -503,7 +503,7 @@ class ArchiveSourceTest {
         )
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
-            archive.saveAsZip(output, options)
+            archive.zipTo(output, options)
         }
 
         val finalProgress = progressEvents.last()
@@ -516,7 +516,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip uses configured buffer size`() {
+    fun `zipTo uses configured buffer size`() {
         val zip = createZip("large.txt" to ByteArray(32) { it.toByte() })
         val output = tempDir.resolve("small-buffer-save.zip")
         val progressEvents = mutableListOf<ArchiveSaveProgress>()
@@ -533,7 +533,7 @@ class ArchiveSourceTest {
             .withPolicy(SecurityPolicy.strict().copy(maxCompressionRatio = 10_000.0))
             .extractToTemp()
             .use { archive ->
-                archive.saveAsZip(output, options)
+                archive.zipTo(output, options)
             }
 
         assertTrue(progressEvents.size > 1)
@@ -541,7 +541,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip cancellation deletes partial output`() {
+    fun `zipTo cancellation deletes partial output`() {
         val zip = createZip("large.txt" to ByteArray(128 * 1024) { it.toByte() })
         val output = tempDir.resolve("canceled-save.zip")
         val canceled = AtomicBoolean(false)
@@ -559,7 +559,7 @@ class ArchiveSourceTest {
             .extractToTemp()
             .use { archive ->
                 assertFailsWith<ArchiveOperationCanceledException> {
-                    archive.saveAsZip(output, options)
+                    archive.zipTo(output, options)
                 }
             }
 
@@ -567,7 +567,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `pre canceled saveAsZip does not create output file`() {
+    fun `pre canceled zipTo does not create output file`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("pre-canceled-save.zip")
         val options = ArchiveSaveOptions(
@@ -576,7 +576,7 @@ class ArchiveSourceTest {
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<ArchiveOperationCanceledException> {
-                archive.saveAsZip(output, options)
+                archive.zipTo(output, options)
             }
         }
 
@@ -584,7 +584,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `pre canceled saveAsZip replace preserves existing output`() {
+    fun `pre canceled zipTo replace preserves existing output`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("pre-canceled-existing.zip")
         Files.writeString(output, "existing")
@@ -595,7 +595,7 @@ class ArchiveSourceTest {
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<ArchiveOperationCanceledException> {
-                archive.saveAsZip(output, options)
+                archive.zipTo(output, options)
             }
         }
 
@@ -603,7 +603,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip can write empty archive after filtering all entries`() {
+    fun `zipTo can write empty archive after filtering all entries`() {
         val zip = createZip(
             "empty/" to null,
             "file.txt" to "hello".toByteArray(),
@@ -614,7 +614,7 @@ class ArchiveSourceTest {
             .build()
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
-            archive.saveAsZip(output, options)
+            archive.zipTo(output, options)
         }
 
         ZipFile(output.toFile()).use { repacked ->
@@ -623,7 +623,7 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip filter failure preserves existing output`() {
+    fun `zipTo filter failure preserves existing output`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val output = tempDir.resolve("filter-failed-existing.zip")
         Files.writeString(output, "existing")
@@ -636,7 +636,7 @@ class ArchiveSourceTest {
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<IllegalStateException> {
-                archive.saveAsZip(output, options)
+                archive.zipTo(output, options)
             }
         }
 
@@ -671,12 +671,12 @@ class ArchiveSourceTest {
     }
 
     @Test
-    fun `saveAsZip rejects output inside extracted archive root`() {
+    fun `zipTo rejects output inside extracted archive root`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
             assertFailsWith<ArchiveWriteException> {
-                archive.saveAsZip(archive.root.resolve("nested.zip"))
+                archive.zipTo(archive.root.resolve("nested.zip"))
             }
         }
     }

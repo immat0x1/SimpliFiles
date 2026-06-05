@@ -1,5 +1,6 @@
 package org.simplifiles.archive
 
+import org.simplifiles.files.SimpliFile
 import org.simplifiles.internal.archive.ArchivePathResolver
 import org.simplifiles.internal.archive.zip.ZipArchiveWriter
 import org.simplifiles.internal.io.FileTreeCleaner
@@ -99,8 +100,8 @@ class ExtractedArchive internal constructor(
      *
      * By default, the output file must not already exist and must be outside [root].
      */
-    fun saveAsZip(path: Path) {
-        saveAsZip(path, ArchiveSaveOptions.defaults())
+    fun zipTo(path: Path): SimpliFile {
+        return zipTo(path, ArchiveSaveOptions.defaults())
     }
 
     /**
@@ -108,25 +109,18 @@ class ExtractedArchive internal constructor(
      *
      * By default, the output file must not already exist and must be outside [root].
      */
-    fun saveAsZip(path: Path, options: ArchiveSaveOptions) {
+    fun zipTo(path: Path, options: ArchiveSaveOptions): SimpliFile {
         ZipArchiveWriter.write(root = root, output = path, options = options)
+        return SimpliFile(path)
     }
 
-    fun saveAsZip(path: String) {
-        saveAsZip(Paths.get(path))
-    }
+    fun zipTo(path: String): SimpliFile = zipTo(Paths.get(path))
 
-    fun saveAsZip(path: String, options: ArchiveSaveOptions) {
-        saveAsZip(Paths.get(path), options)
-    }
+    fun zipTo(path: String, options: ArchiveSaveOptions): SimpliFile = zipTo(Paths.get(path), options)
 
-    fun saveAsZip(file: File) {
-        saveAsZip(Paths.get(file.path))
-    }
+    fun zipTo(file: File): SimpliFile = zipTo(Paths.get(file.path))
 
-    fun saveAsZip(file: File, options: ArchiveSaveOptions) {
-        saveAsZip(Paths.get(file.path), options)
-    }
+    fun zipTo(file: File, options: ArchiveSaveOptions): SimpliFile = zipTo(Paths.get(file.path), options)
 
     /**
      * Closes this session and deletes the extracted root when it is temporary.

@@ -48,7 +48,7 @@ class JavaConsumerSmokeTest {
             archive.directory("reports").create();
             archive.file("reports/summary.txt").writeText(text, StandardCharsets.UTF_8);
             assertThrows(UnsafeArchivePathException.class, () -> archive.file("../outside.txt"));
-            archive.saveAsZip(output);
+            archive.zipTo(output);
         }
 
         try (ExtractedArchive archive = SimpliFiles.archive(output).extractToTemp()) {

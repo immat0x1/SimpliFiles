@@ -26,7 +26,7 @@ class KotlinConsumerSmokeTest {
                 val config = archive.file("config/app.yml").readText()
                 archive.directory("reports").create()
                 archive.file("reports/summary.txt").writeText(config)
-                archive.saveAsZip(output)
+                archive.zipTo(output)
             }
 
         SimpliFiles.archive(output).extractToTemp().use { archive ->

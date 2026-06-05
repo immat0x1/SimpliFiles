@@ -393,12 +393,12 @@ public final class org/simplifiles/archive/ExtractedArchive : java/lang/AutoClos
 	public final fun getDirectories ()Ljava/util/List;
 	public final fun getFiles ()Ljava/util/List;
 	public final fun getRoot ()Ljava/nio/file/Path;
-	public final fun saveAsZip (Ljava/io/File;)V
-	public final fun saveAsZip (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
-	public final fun saveAsZip (Ljava/lang/String;)V
-	public final fun saveAsZip (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
-	public final fun saveAsZip (Ljava/nio/file/Path;)V
-	public final fun saveAsZip (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)V
+	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/archive/ValidationReport {

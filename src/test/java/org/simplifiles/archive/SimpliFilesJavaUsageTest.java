@@ -72,7 +72,7 @@ class SimpliFilesJavaUsageTest {
             assertTrue(reports.exists());
             assertEquals(1, reports.walkFiles().size());
 
-            archive.saveAsZip(output, saveOptions);
+            archive.zipTo(output, saveOptions);
         }
 
         assertEquals(1, extractedEntries.get());
