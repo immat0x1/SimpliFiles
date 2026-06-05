@@ -1,6 +1,7 @@
 package org.simplifiles.archive
 
 import org.simplifiles.internal.archive.ArchivePathResolver
+import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -18,6 +19,17 @@ class ArchiveFile internal constructor(
     val path: String,
     val absolutePath: Path,
 ) {
+    /**
+     * Java [File] view of this extracted archive file.
+     */
+    val file: File
+        get() = File(absolutePath.toString())
+
+    /**
+     * Java-friendly equivalent of the [file] property.
+     */
+    fun toFile(): File = file
+
     val exists: Boolean
         get() = Files.exists(absolutePath)
 

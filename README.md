@@ -202,6 +202,29 @@ source.copyTo("dist/public", OverwritePolicy.REPLACE)
 source.moveTo("archive/public", OverwritePolicy.ERROR)
 ```
 
+For directory-specific workflows, use `DirectoryTransferOptions`. `DirectoryOverwritePolicy.MERGE` keeps existing target files that are not touched by the source tree, while replacing conflicting source paths.
+
+```kotlin
+import org.simplifiles.files.DirectoryOverwritePolicy
+import org.simplifiles.files.DirectoryTransferOptions
+
+val options = DirectoryTransferOptions.builder()
+    .overwritePolicy(DirectoryOverwritePolicy.MERGE)
+    .maxFiles(10_000)
+    .maxBytes(512L * 1024L * 1024L)
+    .build()
+
+SimpliFiles.directory("assets")
+    .copyTo("build/assets", options)
+```
+
+Use `clean()` when a workspace directory should stay in place, but all of its contents should be removed.
+
+```kotlin
+SimpliFiles.directory("build/tmp")
+    .clean()
+```
+
 ## Archive Recipes
 
 ### Validate Before Extracting

@@ -88,6 +88,29 @@ class SimpliDirectoryTest {
     }
 
     @Test
+    fun `directory can be cleaned without deleting root`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("reports/summary.txt").writeText("summary")
+        root.directory("empty").create()
+
+        val cleaned = root.clean()
+
+        assertTrue(cleaned.exists)
+        assertEquals(emptyList(), cleaned.walkFiles())
+        assertEquals(emptyList(), cleaned.directories)
+    }
+
+    @Test
+    fun `clean creates missing directory as empty workspace`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace"))
+
+        root.clean()
+
+        assertTrue(root.exists)
+        assertEquals(emptyList(), root.walkFiles())
+    }
+
+    @Test
     fun `directory can be zipped`() {
         val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
         root.file("config.json").writeText("""{"enabled":true}""")
@@ -387,6 +410,100 @@ class SimpliDirectoryTest {
         moveSource.moveTo(target.path, OverwritePolicy.SKIP)
         assertTrue(moveSource.exists)
         assertEquals("new", target.file("file.txt").readText())
+    }
+
+    @Test
+    fun `directory copy can merge into existing tree`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("file.txt").writeText("new")
+        source.file("nested/item.txt").writeText("item")
+        val target = SimpliFiles.directory(tempDir.resolve("target")).create()
+        target.file("file.txt").writeText("old")
+        target.file("stale.txt").writeText("stale")
+
+        val options = DirectoryTransferOptions.builder()
+            .overwritePolicy(DirectoryOverwritePolicy.MERGE)
+            .build()
+
+        source.copyTo(target.path, options)
+
+        assertEquals("new", target.file("file.txt").readText())
+        assertEquals("item", target.file("nested/item.txt").readText())
+        assertEquals("stale", target.file("stale.txt").readText())
+    }
+
+    @Test
+    fun `directory copy merge replaces conflicting file and directory shapes`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("as-directory/file.txt").writeText("file")
+        source.file("as-file").writeText("content")
+        val target = SimpliFiles.directory(tempDir.resolve("target")).create()
+        target.file("as-directory").writeText("old file")
+        target.directory("as-file").create()
+        target.file("as-file/stale.txt").writeText("stale")
+
+        val options = DirectoryTransferOptions.builder()
+            .overwritePolicy(DirectoryOverwritePolicy.MERGE)
+            .build()
+
+        source.copyTo(target.path, options)
+
+        assertEquals("file", target.file("as-directory/file.txt").readText())
+        assertEquals("content", target.file("as-file").readText())
+        assertFalse(target.directory("as-file").exists)
+    }
+
+    @Test
+    fun `directory move can merge then remove source tree`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("fresh.txt").writeText("fresh")
+        val target = SimpliFiles.directory(tempDir.resolve("target")).create()
+        target.file("existing.txt").writeText("existing")
+        val options = DirectoryTransferOptions.builder()
+            .overwritePolicy(DirectoryOverwritePolicy.MERGE)
+            .build()
+
+        source.moveTo(target.path, options)
+
+        assertFalse(source.exists)
+        assertEquals("fresh", target.file("fresh.txt").readText())
+        assertEquals("existing", target.file("existing.txt").readText())
+    }
+
+    @Test
+    fun `directory copy limits fail before replacing target`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("one.txt").writeText("one")
+        source.file("two.txt").writeText("two")
+        val target = SimpliFiles.directory(tempDir.resolve("target")).create()
+        target.file("existing.txt").writeText("existing")
+        val options = DirectoryTransferOptions.builder()
+            .overwritePolicy(DirectoryOverwritePolicy.REPLACE)
+            .maxFiles(1)
+            .build()
+
+        assertFailsWith<FileOperationException> {
+            source.copyTo(target.path, options)
+        }
+
+        assertEquals("existing", target.file("existing.txt").readText())
+    }
+
+    @Test
+    fun `directory copy byte limits fail before writing output`() {
+        val source = SimpliFiles.directory(tempDir.resolve("source")).create()
+        source.file("payload.txt").writeText("too large")
+        val target = SimpliFiles.directory(tempDir.resolve("target"))
+        val options = DirectoryTransferOptions.builder()
+            .overwritePolicy(DirectoryOverwritePolicy.ERROR)
+            .maxBytes(3)
+            .build()
+
+        assertFailsWith<FileOperationException> {
+            source.copyTo(target.path, options)
+        }
+
+        assertFalse(target.exists)
     }
 
     @Test

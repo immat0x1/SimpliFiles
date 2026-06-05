@@ -4,6 +4,7 @@ import org.simplifiles.exception.ArchiveOperationException
 import org.simplifiles.internal.archive.ArchivePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
 import org.simplifiles.internal.io.FileTreeCopier
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -19,6 +20,17 @@ class ArchiveDirectory internal constructor(
     val path: String,
     val absolutePath: Path,
 ) {
+    /**
+     * Java [File] view of this extracted archive directory.
+     */
+    val file: File
+        get() = File(absolutePath.toString())
+
+    /**
+     * Java-friendly equivalent of the [file] property.
+     */
+    fun toFile(): File = file
+
     val exists: Boolean
         get() = Files.isDirectory(absolutePath)
 

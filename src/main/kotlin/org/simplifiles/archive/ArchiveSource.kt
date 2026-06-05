@@ -100,7 +100,7 @@ class ArchiveSource internal constructor(
         planExtractionTo(Paths.get(path))
 
     fun planExtractionTo(file: File): ArchiveExtractionPlan =
-        planExtractionTo(file.toPath())
+        planExtractionTo(Paths.get(file.path))
 
     /**
      * Safely extracts the archive into a new or empty target directory.
@@ -142,10 +142,10 @@ class ArchiveSource internal constructor(
     fun extractTo(path: String, options: ArchiveExtractionOptions): ExtractedArchive =
         extractTo(Paths.get(path), options)
 
-    fun extractTo(file: File): ExtractedArchive = extractTo(file.toPath())
+    fun extractTo(file: File): ExtractedArchive = extractTo(Paths.get(file.path))
 
     fun extractTo(file: File, options: ArchiveExtractionOptions): ExtractedArchive =
-        extractTo(file.toPath(), options)
+        extractTo(Paths.get(file.path), options)
 
     /**
      * Safely extracts the archive into a temporary directory.

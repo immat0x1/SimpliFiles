@@ -41,6 +41,13 @@ class ArchiveDirectoryTest {
                 listOf("docs/guides/install.txt", "docs/readme.txt"),
                 docs.walkFiles().map { it.path }.sorted(),
             )
+            assertEquals("docs", docs.file.name)
+            assertEquals(docs.file.path, docs.toFile().path)
+            assertEquals("readme.txt", archive.file("docs/readme.txt").file.name)
+            assertEquals(
+                archive.file("docs/readme.txt").file.path,
+                archive.file("docs/readme.txt").toFile().path,
+            )
         }
     }
 

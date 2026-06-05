@@ -174,6 +174,34 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `file overloads extract and save archives`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val target = tempDir.resolve("file-output").toFile()
+        val repacked = tempDir.resolve("file-output.zip").toFile()
+
+        SimpliFiles.archive(zip.toFile()).extractTo(target).use { archive ->
+            assertEquals("hello", archive.file("file.txt").readText())
+            archive.saveAsZip(repacked)
+        }
+
+        SimpliFiles.archive(repacked).extractToTemp().use { archive ->
+            assertEquals("hello", archive.file("file.txt").readText())
+        }
+    }
+
+    @Test
+    fun `file overload plans extraction`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val target = tempDir.resolve("planned-file-output").toFile()
+
+        val plan = SimpliFiles.archive(zip).planExtractionTo(target)
+
+        assertTrue(plan.isSafe)
+        assertEquals(1, plan.totalEntries)
+        assertFalse(target.exists())
+    }
+
+    @Test
     fun `extractToTemp deletes temporary files on close`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         lateinit var root: Path

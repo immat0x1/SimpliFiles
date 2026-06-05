@@ -1,7 +1,7 @@
 package org.simplifiles.files
 
-import org.simplifiles.exception.FileOperationException
 import org.simplifiles.archive.ArchiveSaveOptions
+import org.simplifiles.exception.FileOperationException
 import org.simplifiles.internal.archive.zip.ZipArchiveWriter
 import org.simplifiles.internal.files.SafePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
@@ -80,6 +80,16 @@ class SimpliDirectory internal constructor(
         return true
     }
 
+    fun clean(): SimpliDirectory {
+        if (!exists) {
+            create()
+            return this
+        }
+
+        FileTreeCleaner.deleteContents(path)
+        return this
+    }
+
     fun resolveInside(path: String): Path = SafePathResolver.resolveInside(this.path, path)
 
     fun file(path: String): SimpliFile = SimpliFile(resolveInside(path))
@@ -138,20 +148,21 @@ class SimpliDirectory internal constructor(
     fun copyTo(
         target: Path,
         overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = copyTo(target, overwritePolicy.toDirectoryTransferOptions())
+
+    fun copyTo(
+        target: Path,
+        options: DirectoryTransferOptions,
     ): SimpliDirectory {
-        if (target.toAbsolutePath().normalize().startsWith(path.toAbsolutePath().normalize())) {
-            throw FileOperationException("Directory cannot be copied into itself: $target")
+        ensureExists()
+        rejectSelfTarget(target, "copied")
+
+        validateBeforeReplacing(target, options)
+        whenExistingTarget(target, options) {
+            return SimpliDirectory(target)
         }
 
-        if (Files.exists(target)) {
-            when (overwritePolicy) {
-                OverwritePolicy.ERROR -> throw FileOperationException("Target already exists: $target")
-                OverwritePolicy.SKIP -> return SimpliDirectory(target)
-                OverwritePolicy.REPLACE -> FileTreeCleaner.deleteRecursively(target)
-            }
-        }
-
-        FileTreeCopier.copyDirectory(path, target)
+        FileTreeCopier.copyDirectory(path, target, options)
         return SimpliDirectory(target)
     }
 
@@ -162,6 +173,11 @@ class SimpliDirectory internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = copyTo(Paths.get(target), overwritePolicy)
 
+    fun copyTo(
+        target: String,
+        options: DirectoryTransferOptions,
+    ): SimpliDirectory = copyTo(Paths.get(target), options)
+
     fun copyTo(target: File): SimpliDirectory = copyTo(Paths.get(target.path))
 
     fun copyTo(
@@ -169,24 +185,37 @@ class SimpliDirectory internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = copyTo(Paths.get(target.path), overwritePolicy)
 
+    fun copyTo(
+        target: File,
+        options: DirectoryTransferOptions,
+    ): SimpliDirectory = copyTo(Paths.get(target.path), options)
+
     fun moveTo(target: Path): SimpliDirectory = moveTo(target, OverwritePolicy.REPLACE)
 
     fun moveTo(
         target: Path,
         overwritePolicy: OverwritePolicy,
+    ): SimpliDirectory = moveTo(target, overwritePolicy.toDirectoryTransferOptions())
+
+    fun moveTo(
+        target: Path,
+        options: DirectoryTransferOptions,
     ): SimpliDirectory {
-        if (target.toAbsolutePath().normalize().startsWith(path.toAbsolutePath().normalize())) {
-            throw FileOperationException("Directory cannot be moved into itself: $target")
+        ensureExists()
+        rejectSelfTarget(target, "moved")
+
+        validateBeforeReplacing(target, options)
+        whenExistingTarget(target, options) {
+            return SimpliDirectory(target)
         }
 
-        if (Files.exists(target)) {
-            when (overwritePolicy) {
-                OverwritePolicy.ERROR -> throw FileOperationException("Target already exists: $target")
-                OverwritePolicy.SKIP -> return SimpliDirectory(target)
-                OverwritePolicy.REPLACE -> FileTreeCleaner.deleteRecursively(target)
-            }
+        if (options.overwritePolicy == DirectoryOverwritePolicy.MERGE && Files.exists(target)) {
+            FileTreeCopier.copyDirectory(path, target, options)
+            FileTreeCleaner.deleteRecursively(path)
+            return SimpliDirectory(target)
         }
 
+        FileTreeCopier.validateDirectory(path, options)
         target.parent?.let(Files::createDirectories)
         Files.move(path, target, StandardCopyOption.REPLACE_EXISTING)
         return SimpliDirectory(target)
@@ -199,10 +228,70 @@ class SimpliDirectory internal constructor(
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = moveTo(Paths.get(target), overwritePolicy)
 
+    fun moveTo(
+        target: String,
+        options: DirectoryTransferOptions,
+    ): SimpliDirectory = moveTo(Paths.get(target), options)
+
     fun moveTo(target: File): SimpliDirectory = moveTo(Paths.get(target.path))
 
     fun moveTo(
         target: File,
         overwritePolicy: OverwritePolicy,
     ): SimpliDirectory = moveTo(Paths.get(target.path), overwritePolicy)
+
+    fun moveTo(
+        target: File,
+        options: DirectoryTransferOptions,
+    ): SimpliDirectory = moveTo(Paths.get(target.path), options)
+
+    private fun ensureExists() {
+        if (!exists) {
+            throw FileOperationException("Directory does not exist: $path")
+        }
+    }
+
+    private fun rejectSelfTarget(
+        target: Path,
+        operation: String,
+    ) {
+        if (target.toAbsolutePath().normalize().startsWith(path.toAbsolutePath().normalize())) {
+            throw FileOperationException("Directory cannot be $operation into itself: $target")
+        }
+    }
+
+    private inline fun whenExistingTarget(
+        target: Path,
+        options: DirectoryTransferOptions,
+        onSkip: () -> Unit,
+    ) {
+        if (!Files.exists(target)) {
+            return
+        }
+
+        when (options.overwritePolicy) {
+            DirectoryOverwritePolicy.ERROR -> throw FileOperationException("Target already exists: $target")
+            DirectoryOverwritePolicy.SKIP -> onSkip()
+            DirectoryOverwritePolicy.REPLACE -> FileTreeCleaner.deleteRecursively(target)
+            DirectoryOverwritePolicy.MERGE -> Unit
+        }
+    }
+
+    private fun validateBeforeReplacing(
+        target: Path,
+        options: DirectoryTransferOptions,
+    ) {
+        if (Files.exists(target) && options.overwritePolicy == DirectoryOverwritePolicy.REPLACE) {
+            FileTreeCopier.validateDirectory(path, options)
+        }
+    }
+
+    private fun OverwritePolicy.toDirectoryTransferOptions(): DirectoryTransferOptions {
+        val directoryPolicy = when (this) {
+            OverwritePolicy.ERROR -> DirectoryOverwritePolicy.ERROR
+            OverwritePolicy.REPLACE -> DirectoryOverwritePolicy.REPLACE
+            OverwritePolicy.SKIP -> DirectoryOverwritePolicy.SKIP
+        }
+        return DirectoryTransferOptions(overwritePolicy = directoryPolicy)
+    }
 }

@@ -121,11 +121,11 @@ class ExtractedArchive internal constructor(
     }
 
     fun saveAsZip(file: File) {
-        saveAsZip(file.toPath())
+        saveAsZip(Paths.get(file.path))
     }
 
     fun saveAsZip(file: File, options: ArchiveSaveOptions) {
-        saveAsZip(file.toPath(), options)
+        saveAsZip(Paths.get(file.path), options)
     }
 
     /**
