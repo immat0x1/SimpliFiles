@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/immat0x1/SimpliFiles/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/immat0x1/SimpliFiles/ci.yml?branch=main&style=flat-square"></a>
-  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.4--SNAPSHOT-1684ff?style=flat-square"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.5--SNAPSHOT-1684ff?style=flat-square"></a>
   <img alt="Java" src="https://img.shields.io/badge/Java-17%2B-f89820?style=flat-square">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-JVM-7f52ff?style=flat-square">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-green?style=flat-square"></a>
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.immat0x1:simplifiles:0.1.4-SNAPSHOT")
+    implementation("io.github.immat0x1:simplifiles:0.1.5-SNAPSHOT")
 }
 ```
 
@@ -60,6 +60,7 @@ SimpliFiles was created to make those workflows short by default and safer by de
 | Archive extraction is easy to make unsafe | Zip Slip, absolute paths, duplicate paths, oversized entries, and zip bombs are easy to miss | Strict `SecurityPolicy` is applied before extraction and while bytes are written |
 | You only get files on disk after extraction | The caller has to rebuild convenience helpers around the output directory | `ExtractedArchive`, `ArchiveFile`, and `ArchiveDirectory` provide handles for reading, editing, deleting, moving, and saving |
 | Reading user-controlled files can accidentally load too much | `readText()` and `readBytes()` have no built-in limit | Bounded reads make limits explicit: `readText(maxBytes = ...)` |
+| Copying streams into files is repetitive | You open output streams, create parents, copy bytes, and remember limits yourself | `writeFrom(...)` and `writeFromAtomic(...)` write streams directly into file handles |
 | Updating small metadata files is awkward to do safely | Direct writes can leave half-written files after failures | `writeTextAtomic(...)` writes through a temporary file and swaps it into place |
 | Repacking or creating ZIP files is verbose | You manually build `ZipOutputStream` and preserve directory entries yourself | `ExtractedArchive.zipTo(...)`, `SimpliDirectory.zipTo(...)`, and `SimpliFiles.pack()` create ZIP output from high-level handles |
 | Java and Android integrations often still need `File` | Code has to bounce between `Path`, `File`, and custom checks | `SimpliFile.file` and `SimpliDirectory.file` expose Java `File` views without pushing NIO details into app code |
@@ -114,6 +115,30 @@ val manifest = SimpliFiles.file("manifest.json")
 
 If the file is larger than the limit, SimpliFiles throws `FileOperationException`.
 
+### Bounded Lines
+
+```kotlin
+val metadata = SimpliFiles.file("META-INF/MANIFEST.MF")
+    .readLines(maxBytes = 4L * 1024L * 1024L)
+
+SimpliFiles.file("events.log")
+    .forEachLine(maxBytes = 8L * 1024L * 1024L) { line ->
+        println(line)
+    }
+```
+
+### Stream Writes and Markers
+
+```kotlin
+inputStream.use { input ->
+    SimpliFiles.file("downloads/archive.zip")
+        .writeFromAtomic(input, maxBytes = 128L * 1024L * 1024L)
+}
+
+SimpliFiles.file("state/.installed")
+    .touch()
+```
+
 ### Copy and Move Policies
 
 ```kotlin
@@ -164,6 +189,12 @@ val options = ArchiveSaveOptions.builder()
     .build()
 
 workspace.zipTo("workspace.zip", options)
+```
+
+For only target overwrite behavior, pass the policy directly:
+
+```kotlin
+workspace.zipTo("workspace.zip", OverwritePolicy.REPLACE)
 ```
 
 ### Pack Files and Directories
@@ -255,6 +286,32 @@ if (report.isSafe) {
 }
 ```
 
+### Extract to a Directory Handle
+
+Use `extractToDirectory` when the caller only needs the final directory, not a mutable extracted archive session.
+
+```kotlin
+val output = SimpliFiles.archive("upload.zip")
+    .extractToDirectory("output")
+
+val manifest = output.file("manifest.json")
+    .readText(maxBytes = 256 * 1024)
+```
+
+### Target Policy
+
+```kotlin
+import org.simplifiles.archive.ArchiveExtractionOptions
+import org.simplifiles.archive.ExtractionTargetPolicy
+
+val options = ArchiveExtractionOptions.builder()
+    .targetPolicy(ExtractionTargetPolicy.CLEAN)
+    .build()
+
+SimpliFiles.archive("upload.zip")
+    .extractToDirectory("output", options)
+```
+
 ### Extract to a Temporary Workspace
 
 Temporary extractions are deleted when the `use` block exits.
@@ -328,20 +385,25 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
 
 - Regular file read, write, append, copy, move, delete
 - Bounded file reads
+- Bounded line reads
 - Atomic text and byte writes
+- Stream writes and atomic stream writes
+- Empty marker creation with `touch()`
 - Directory create, list, walk, copy, move, recursive delete
 - Safe child path resolution inside a directory root
 - Copy and move overwrite policies
 - ZIP inspection without extraction
 - ZIP validation report
 - Dry-run extraction plans
-- Safe extraction to a new or empty directory
+- Safe extraction to a new, empty, cleaned, or replaced directory
+- Direct extraction to a `SimpliDirectory`
 - Temporary extraction with cleanup on close
 - Extraction progress callbacks
 - Extraction cancellation tokens
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
 - Save overwrite policy, compression level, and entry filters
+- Direct ZIP overwrite policy shortcuts
 - ZIP creation from independent files and directories with `SimpliFiles.pack()`
 - JMH benchmarks against direct Java ZIP baselines
 - Glob search for extracted files

@@ -2,12 +2,15 @@
 
 ## Unreleased
 
-- Started `0.1.4-SNAPSHOT` development.
+- Started `0.1.5-SNAPSHOT` development.
 - Added archive save overwrite policy, compression level, and entry filter options.
 - Added composable `ArchiveEntryFilter` helpers.
 - Added directory transfer options with `DirectoryOverwritePolicy.MERGE`, file-count limits, byte limits, and `SimpliDirectory.clean()`.
 - Added `SimpliFiles.pack()` for creating ZIP archives from independent files and directories.
 - Renamed extracted archive repacking from `saveAsZip(...)` to `zipTo(...)` and made it return `SimpliFile`.
+- Added `SimpliFile.writeFrom(...)`, `writeFromAtomic(...)`, `touch()`, `readLines(maxBytes = ...)`, and `forEachLine(maxBytes = ...)`.
+- Added `ExtractionTargetPolicy` and `ArchiveSource.extractToDirectory(...)`.
+- Added direct `zipTo(..., OverwritePolicy)` shortcuts.
 - Improved `REPLACE` archive saves so existing output is preserved until the new archive is written successfully.
 - Improved archive path inspection and validation performance by reducing per-entry allocations.
 
