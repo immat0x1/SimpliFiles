@@ -6,6 +6,7 @@ import org.simplifiles.archive.ArchiveExtractionOptions
 import org.simplifiles.archive.ArchiveIssue
 import org.simplifiles.archive.ArchiveIssueSeverity
 import org.simplifiles.archive.ArchiveProgress
+import org.simplifiles.archive.ExtractionTargetPolicy
 import org.simplifiles.archive.ExtractedArchive
 import org.simplifiles.archive.ValidationReport
 import org.simplifiles.archive.security.DuplicatePolicy
@@ -43,7 +44,7 @@ internal object ZipArchiveExtractor {
         )
 
         progress.checkCanceled()
-        prepareTarget(root)
+        prepareTarget(root, options.targetPolicy)
 
         return try {
             progress.emit(currentEntryPath = null)
@@ -59,15 +60,34 @@ internal object ZipArchiveExtractor {
         }
     }
 
-    private fun prepareTarget(root: Path) {
+    private fun prepareTarget(
+        root: Path,
+        targetPolicy: ExtractionTargetPolicy,
+    ) {
         if (Files.exists(root)) {
-            if (!Files.isDirectory(root)) {
-                throw ExtractionTargetException(root, "target exists but is not a directory")
+            when (targetPolicy) {
+                ExtractionTargetPolicy.ERROR_IF_NOT_EMPTY -> {
+                    if (!Files.isDirectory(root)) {
+                        throw ExtractionTargetException(root, "target exists but is not a directory")
+                    }
+                    if (!isDirectoryEmpty(root)) {
+                        throw ExtractionTargetException(root, "target directory must be empty")
+                    }
+                    return
+                }
+
+                ExtractionTargetPolicy.CLEAN -> {
+                    if (!Files.isDirectory(root)) {
+                        throw ExtractionTargetException(root, "target exists but is not a directory")
+                    }
+                    FileTreeCleaner.deleteContents(root)
+                    return
+                }
+
+                ExtractionTargetPolicy.REPLACE -> {
+                    FileTreeCleaner.deleteRecursively(root)
+                }
             }
-            if (!isDirectoryEmpty(root)) {
-                throw ExtractionTargetException(root, "target directory must be empty")
-            }
-            return
         }
 
         Files.createDirectories(root)

@@ -78,12 +78,14 @@ public final class org/simplifiles/archive/ArchiveExtractionOptions {
 	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;I)V
-	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/archive/ExtractionTargetPolicy;)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/archive/ExtractionTargetPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun builder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
 	public static final fun defaults ()Lorg/simplifiles/archive/ArchiveExtractionOptions;
 	public final fun getBufferSize ()I
 	public final fun getCancellationToken ()Lorg/simplifiles/archive/CancellationToken;
 	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveProgressListener;
+	public final fun getTargetPolicy ()Lorg/simplifiles/archive/ExtractionTargetPolicy;
 	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
 }
 
@@ -93,6 +95,7 @@ public final class org/simplifiles/archive/ArchiveExtractionOptions$Builder {
 	public final fun build ()Lorg/simplifiles/archive/ArchiveExtractionOptions;
 	public final fun cancellationToken (Lorg/simplifiles/archive/CancellationToken;)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
 	public final fun progressListener (Lorg/simplifiles/archive/ArchiveProgressListener;)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public final fun targetPolicy (Lorg/simplifiles/archive/ExtractionTargetPolicy;)Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
 }
 
 public final class org/simplifiles/archive/ArchiveExtractionOptions$Companion {
@@ -210,10 +213,13 @@ public final class org/simplifiles/archive/ArchivePack {
 	public final fun addFile (Ljava/nio/file/Path;Ljava/lang/String;)Lorg/simplifiles/archive/ArchivePack;
 	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/archive/ArchivePlannedAction : java/lang/Enum {
@@ -361,6 +367,12 @@ public final class org/simplifiles/archive/ArchiveSource {
 	public final fun extractTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun extractTo (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun extractTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
+	public final fun extractToDirectory (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun extractToDirectory (Ljava/io/File;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun extractToDirectory (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun extractToDirectory (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun extractToDirectory (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliDirectory;
+	public final fun extractToDirectory (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun extractToTemp ()Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun extractToTemp (Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun getPath ()Ljava/nio/file/Path;
@@ -395,10 +407,22 @@ public final class org/simplifiles/archive/ExtractedArchive : java/lang/AutoClos
 	public final fun getRoot ()Ljava/nio/file/Path;
 	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
+}
+
+public final class org/simplifiles/archive/ExtractionTargetPolicy : java/lang/Enum {
+	public static final field CLEAN Lorg/simplifiles/archive/ExtractionTargetPolicy;
+	public static final field ERROR_IF_NOT_EMPTY Lorg/simplifiles/archive/ExtractionTargetPolicy;
+	public static final field REPLACE Lorg/simplifiles/archive/ExtractionTargetPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/archive/ExtractionTargetPolicy;
+	public static fun values ()[Lorg/simplifiles/archive/ExtractionTargetPolicy;
 }
 
 public final class org/simplifiles/archive/ValidationReport {
@@ -618,10 +642,13 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun walkFiles ()Ljava/util/List;
 	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/lang/String;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
+	public final fun zipTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 }
 
 public final class org/simplifiles/files/SimpliFile {
@@ -636,6 +663,9 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun copyTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun delete ()Z
 	public final fun exists ()Z
+	public final fun forEachLine (JLjava/nio/charset/Charset;Lkotlin/jvm/functions/Function1;)V
+	public final fun forEachLine (JLkotlin/jvm/functions/Function1;)V
+	public static synthetic fun forEachLine$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun getExists ()Z
 	public final fun getExtension ()Ljava/lang/String;
 	public final fun getFile ()Ljava/io/File;
@@ -651,6 +681,9 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun outputStream ()Ljava/io/OutputStream;
 	public final fun readBytes ()[B
 	public final fun readBytes (J)[B
+	public final fun readLines (J)Ljava/util/List;
+	public final fun readLines (JLjava/nio/charset/Charset;)Ljava/util/List;
+	public static synthetic fun readLines$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;ILjava/lang/Object;)Ljava/util/List;
 	public final fun readText ()Ljava/lang/String;
 	public final fun readText (J)Ljava/lang/String;
 	public final fun readText (JLjava/nio/charset/Charset;)Ljava/lang/String;
@@ -658,8 +691,15 @@ public final class org/simplifiles/files/SimpliFile {
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun toFile ()Ljava/io/File;
+	public final fun touch ()Lorg/simplifiles/files/SimpliFile;
 	public final fun writeBytes ([B)V
 	public final fun writeBytesAtomic ([B)V
+	public final fun writeFrom (Ljava/io/InputStream;)Lorg/simplifiles/files/SimpliFile;
+	public final fun writeFrom (Ljava/io/InputStream;J)Lorg/simplifiles/files/SimpliFile;
+	public static synthetic fun writeFrom$default (Lorg/simplifiles/files/SimpliFile;Ljava/io/InputStream;JILjava/lang/Object;)Lorg/simplifiles/files/SimpliFile;
+	public final fun writeFromAtomic (Ljava/io/InputStream;)Lorg/simplifiles/files/SimpliFile;
+	public final fun writeFromAtomic (Ljava/io/InputStream;J)Lorg/simplifiles/files/SimpliFile;
+	public static synthetic fun writeFromAtomic$default (Lorg/simplifiles/files/SimpliFile;Ljava/io/InputStream;JILjava/lang/Object;)Lorg/simplifiles/files/SimpliFile;
 	public final fun writeText (Ljava/lang/String;)V
 	public final fun writeText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
 	public static synthetic fun writeText$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V

@@ -162,6 +162,20 @@ class SimpliDirectoryTest {
     }
 
     @Test
+    fun `directory zip supports overwrite policy shortcut`() {
+        val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
+        root.file("config.json").writeText("{}")
+        val output = tempDir.resolve("workspace.zip")
+        Files.write(output, "old".toByteArray())
+
+        root.zipTo(output, OverwritePolicy.REPLACE)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals("{}", zip.readText("config.json"))
+        }
+    }
+
+    @Test
     fun `directory zip can skip existing output`() {
         val root = SimpliFiles.directory(tempDir.resolve("workspace")).create()
         root.file("config.json").writeText("{}")

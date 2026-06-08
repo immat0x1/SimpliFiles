@@ -4,6 +4,7 @@ import org.simplifiles.archive.security.SecurityPolicy
 import org.simplifiles.exception.ArchiveValidationException
 import org.simplifiles.exception.CorruptedArchiveException
 import org.simplifiles.exception.UnsupportedArchiveFormatException
+import org.simplifiles.files.SimpliDirectory
 import org.simplifiles.internal.archive.ArchiveExtractionPlanner
 import org.simplifiles.internal.archive.ArchiveFormatDetector
 import org.simplifiles.internal.archive.ArchiveValidator
@@ -146,6 +147,32 @@ class ArchiveSource internal constructor(
 
     fun extractTo(file: File, options: ArchiveExtractionOptions): ExtractedArchive =
         extractTo(Paths.get(file.path), options)
+
+    /**
+     * Safely extracts the archive and returns a directory handle for the target.
+     */
+    fun extractToDirectory(path: Path): SimpliDirectory =
+        extractToDirectory(path, ArchiveExtractionOptions.defaults())
+
+    /**
+     * Safely extracts the archive and returns a directory handle for the target.
+     */
+    fun extractToDirectory(path: Path, options: ArchiveExtractionOptions): SimpliDirectory =
+        extractTo(path, options).use { archive ->
+            SimpliDirectory(archive.root)
+        }
+
+    fun extractToDirectory(path: String): SimpliDirectory =
+        extractToDirectory(Paths.get(path))
+
+    fun extractToDirectory(path: String, options: ArchiveExtractionOptions): SimpliDirectory =
+        extractToDirectory(Paths.get(path), options)
+
+    fun extractToDirectory(file: File): SimpliDirectory =
+        extractToDirectory(Paths.get(file.path))
+
+    fun extractToDirectory(file: File, options: ArchiveExtractionOptions): SimpliDirectory =
+        extractToDirectory(Paths.get(file.path), options)
 
     /**
      * Safely extracts the archive into a temporary directory.

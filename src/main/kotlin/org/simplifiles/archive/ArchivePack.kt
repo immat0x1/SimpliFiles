@@ -2,6 +2,7 @@ package org.simplifiles.archive
 
 import org.simplifiles.exception.FileOperationException
 import org.simplifiles.exception.UnsafeArchivePathException
+import org.simplifiles.files.OverwritePolicy
 import org.simplifiles.files.SimpliFile
 import org.simplifiles.internal.archive.ArchivePathAnalyzer
 import org.simplifiles.internal.archive.zip.ZipArchiveWriter
@@ -84,6 +85,16 @@ class ArchivePack internal constructor() {
         return SimpliFile(target)
     }
 
+    fun zipTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(
+        target,
+        ArchiveSaveOptions.builder()
+            .overwritePolicy(overwritePolicy)
+            .build(),
+    )
+
     fun zipTo(target: String): SimpliFile = zipTo(Paths.get(target))
 
     fun zipTo(
@@ -91,12 +102,22 @@ class ArchivePack internal constructor() {
         options: ArchiveSaveOptions,
     ): SimpliFile = zipTo(Paths.get(target), options)
 
+    fun zipTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(Paths.get(target), overwritePolicy)
+
     fun zipTo(target: File): SimpliFile = zipTo(Paths.get(target.path))
 
     fun zipTo(
         target: File,
         options: ArchiveSaveOptions,
     ): SimpliFile = zipTo(Paths.get(target.path), options)
+
+    fun zipTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(Paths.get(target.path), overwritePolicy)
 
     private fun defaultEntryPath(source: Path): String {
         return source.fileName?.toString()

@@ -174,6 +174,17 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `extractToDirectory extracts zip files and returns directory handle`() {
+        val zip = createZip("dir/file.txt" to "hello".toByteArray())
+        val target = tempDir.resolve("directory-output")
+
+        val directory = SimpliFiles.archive(zip).extractToDirectory(target)
+
+        assertEquals("hello", directory.file("dir/file.txt").readText())
+        assertEquals(target.toAbsolutePath().normalize(), directory.path)
+    }
+
+    @Test
     fun `file overloads extract and save archives`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
         val target = tempDir.resolve("file-output").toFile()
@@ -382,6 +393,37 @@ class ArchiveSourceTest {
     }
 
     @Test
+    fun `extractTo can clean existing target directory`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val target = tempDir.resolve("clean-output")
+        Files.createDirectories(target)
+        Files.writeString(target.resolve("existing.txt"), "existing")
+        val options = ArchiveExtractionOptions.builder()
+            .targetPolicy(ExtractionTargetPolicy.CLEAN)
+            .build()
+
+        SimpliFiles.archive(zip).extractToDirectory(target, options)
+
+        assertFalse(target.resolve("existing.txt").exists())
+        assertEquals("hello", target.resolve("file.txt").readText())
+    }
+
+    @Test
+    fun `extractTo can replace existing target path`() {
+        val zip = createZip("file.txt" to "hello".toByteArray())
+        val target = tempDir.resolve("replace-output")
+        Files.writeString(target, "not a directory")
+        val options = ArchiveExtractionOptions.builder()
+            .targetPolicy(ExtractionTargetPolicy.REPLACE)
+            .build()
+
+        val directory = SimpliFiles.archive(zip).extractToDirectory(target, options)
+
+        assertTrue(directory.exists)
+        assertEquals("hello", directory.file("file.txt").readText())
+    }
+
+    @Test
     fun `archive file can write and append text`() {
         val zip = createZip("file.txt" to "hello".toByteArray())
 
@@ -478,12 +520,7 @@ class ArchiveSourceTest {
         Files.writeString(output, "existing")
 
         SimpliFiles.archive(zip).extractToTemp().use { archive ->
-            archive.zipTo(
-                output,
-                ArchiveSaveOptions.builder()
-                    .overwritePolicy(OverwritePolicy.REPLACE)
-                    .build(),
-            )
+            archive.zipTo(output, OverwritePolicy.REPLACE)
         }
 
         ZipFile(output.toFile()).use { repacked ->

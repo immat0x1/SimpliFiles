@@ -1,6 +1,7 @@
 package org.simplifiles.archive
 
 import org.simplifiles.files.SimpliFile
+import org.simplifiles.files.OverwritePolicy
 import org.simplifiles.internal.archive.ArchivePathResolver
 import org.simplifiles.internal.archive.zip.ZipArchiveWriter
 import org.simplifiles.internal.io.FileTreeCleaner
@@ -114,13 +115,27 @@ class ExtractedArchive internal constructor(
         return SimpliFile(path)
     }
 
+    fun zipTo(
+        path: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(
+        path,
+        ArchiveSaveOptions.builder()
+            .overwritePolicy(overwritePolicy)
+            .build(),
+    )
+
     fun zipTo(path: String): SimpliFile = zipTo(Paths.get(path))
 
     fun zipTo(path: String, options: ArchiveSaveOptions): SimpliFile = zipTo(Paths.get(path), options)
 
+    fun zipTo(path: String, overwritePolicy: OverwritePolicy): SimpliFile = zipTo(Paths.get(path), overwritePolicy)
+
     fun zipTo(file: File): SimpliFile = zipTo(Paths.get(file.path))
 
     fun zipTo(file: File, options: ArchiveSaveOptions): SimpliFile = zipTo(Paths.get(file.path), options)
+
+    fun zipTo(file: File, overwritePolicy: OverwritePolicy): SimpliFile = zipTo(Paths.get(file.path), overwritePolicy)
 
     /**
      * Closes this session and deletes the extracted root when it is temporary.

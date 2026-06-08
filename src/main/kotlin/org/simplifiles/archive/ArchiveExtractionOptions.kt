@@ -7,6 +7,7 @@ class ArchiveExtractionOptions @JvmOverloads constructor(
     val progressListener: ArchiveProgressListener? = null,
     val cancellationToken: CancellationToken = CancellationToken.none(),
     val bufferSize: Int = DEFAULT_BUFFER_SIZE,
+    val targetPolicy: ExtractionTargetPolicy = ExtractionTargetPolicy.ERROR_IF_NOT_EMPTY,
 ) {
     init {
         require(bufferSize > 0) { "bufferSize must be positive." }
@@ -42,6 +43,7 @@ class ArchiveExtractionOptions @JvmOverloads constructor(
         private var progressListener: ArchiveProgressListener? = options.progressListener
         private var cancellationToken: CancellationToken = options.cancellationToken
         private var bufferSize: Int = options.bufferSize
+        private var targetPolicy: ExtractionTargetPolicy = options.targetPolicy
 
         fun progressListener(listener: ArchiveProgressListener?): Builder = apply {
             progressListener = listener
@@ -55,10 +57,15 @@ class ArchiveExtractionOptions @JvmOverloads constructor(
             bufferSize = value
         }
 
+        fun targetPolicy(policy: ExtractionTargetPolicy): Builder = apply {
+            targetPolicy = policy
+        }
+
         fun build(): ArchiveExtractionOptions = ArchiveExtractionOptions(
             progressListener = progressListener,
             cancellationToken = cancellationToken,
             bufferSize = bufferSize,
+            targetPolicy = targetPolicy,
         )
     }
 }

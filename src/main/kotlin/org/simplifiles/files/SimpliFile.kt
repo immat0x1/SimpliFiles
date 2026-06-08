@@ -10,6 +10,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import java.nio.file.attribute.FileTime
 
 /**
  * File handle for regular filesystem operations.
@@ -73,6 +74,33 @@ class SimpliFile internal constructor(
         charset: Charset = Charsets.UTF_8,
     ): String = readBytes(maxBytes).toString(charset)
 
+    @JvmOverloads
+    fun readLines(
+        maxBytes: Long,
+        charset: Charset = Charsets.UTF_8,
+    ): List<String> {
+        require(maxBytes >= 0) { "maxBytes must not be negative." }
+        return inputStream().use { input ->
+            BoundedInputStream(input, maxBytes, path).bufferedReader(charset).use { reader ->
+                reader.readLines()
+            }
+        }
+    }
+
+    @JvmOverloads
+    fun forEachLine(
+        maxBytes: Long,
+        charset: Charset = Charsets.UTF_8,
+        block: (String) -> Unit,
+    ) {
+        require(maxBytes >= 0) { "maxBytes must not be negative." }
+        inputStream().use { input ->
+            BoundedInputStream(input, maxBytes, path).bufferedReader(charset).useLines { lines ->
+                lines.forEach(block)
+            }
+        }
+    }
+
     fun writeBytes(bytes: ByteArray) {
         path.parent?.let(Files::createDirectories)
         Files.write(
@@ -82,6 +110,23 @@ class SimpliFile internal constructor(
             StandardOpenOption.TRUNCATE_EXISTING,
             StandardOpenOption.WRITE,
         )
+    }
+
+    @JvmOverloads
+    fun writeFrom(
+        input: InputStream,
+        maxBytes: Long = Long.MAX_VALUE,
+    ): SimpliFile {
+        path.parent?.let(Files::createDirectories)
+        Files.newOutputStream(
+            path,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING,
+            StandardOpenOption.WRITE,
+        ).use { output ->
+            copyFrom(input, output, maxBytes)
+        }
+        return this
     }
 
     @JvmOverloads
@@ -139,6 +184,47 @@ class SimpliFile internal constructor(
             Files.deleteIfExists(temp)
             throw exception
         }
+    }
+
+    @JvmOverloads
+    fun writeFromAtomic(
+        input: InputStream,
+        maxBytes: Long = Long.MAX_VALUE,
+    ): SimpliFile {
+        val parent = path.parent ?: Paths.get(".").toAbsolutePath().normalize()
+        Files.createDirectories(parent)
+
+        val fileName = path.fileName?.toString() ?: throw FileOperationException("File path must include a file name.")
+        val temp = Files.createTempFile(parent, ".$fileName.", ".tmp")
+        try {
+            Files.newOutputStream(temp, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE).use { output ->
+                copyFrom(input, output, maxBytes)
+            }
+            try {
+                Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+                Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING)
+            }
+        } catch (exception: Throwable) {
+            Files.deleteIfExists(temp)
+            throw exception
+        }
+        return this
+    }
+
+    fun touch(): SimpliFile {
+        if (Files.isDirectory(path)) {
+            throw FileOperationException("Path is a directory: $path")
+        }
+        path.parent?.let(Files::createDirectories)
+        Files.write(
+            path,
+            ByteArray(0),
+            StandardOpenOption.CREATE,
+            StandardOpenOption.APPEND,
+        )
+        Files.setLastModifiedTime(path, FileTime.fromMillis(System.currentTimeMillis()))
+        return this
     }
 
     fun delete(): Boolean = Files.deleteIfExists(path)
@@ -220,4 +306,87 @@ class SimpliFile internal constructor(
         target: File,
         overwritePolicy: OverwritePolicy,
     ): SimpliFile = moveTo(Paths.get(target.path), overwritePolicy)
+
+    private fun copyFrom(
+        input: InputStream,
+        output: OutputStream,
+        maxBytes: Long,
+    ): Long {
+        require(maxBytes >= 0) { "maxBytes must not be negative." }
+        val buffer = ByteArray(DEFAULT_FILE_BUFFER_SIZE)
+        var written = 0L
+
+        while (true) {
+            val remaining = maxBytes - written
+            if (remaining == 0L) {
+                if (input.read() < 0) {
+                    return written
+                }
+                throw FileOperationException("Input exceeds write limit of $maxBytes bytes: $path")
+            }
+
+            val readLimit = minOf(buffer.size.toLong(), remaining).toInt()
+            val read = input.read(buffer, 0, readLimit)
+            if (read < 0) {
+                return written
+            }
+
+            output.write(buffer, 0, read)
+            written += read.toLong()
+        }
+    }
+}
+
+private const val DEFAULT_FILE_BUFFER_SIZE: Int = 64 * 1024
+
+private class BoundedInputStream(
+    private val delegate: InputStream,
+    private val maxBytes: Long,
+    private val path: Path,
+) : InputStream() {
+    private var readBytes = 0L
+
+    override fun read(): Int {
+        if (readBytes == maxBytes) {
+            val next = delegate.read()
+            if (next < 0) {
+                return -1
+            }
+            throw FileOperationException("File exceeds read limit of $maxBytes bytes: $path")
+        }
+
+        val next = delegate.read()
+        if (next >= 0) {
+            readBytes++
+        }
+        return next
+    }
+
+    override fun read(
+        buffer: ByteArray,
+        offset: Int,
+        length: Int,
+    ): Int {
+        if (length == 0) {
+            return 0
+        }
+        if (readBytes == maxBytes) {
+            val next = delegate.read()
+            if (next < 0) {
+                return -1
+            }
+            throw FileOperationException("File exceeds read limit of $maxBytes bytes: $path")
+        }
+
+        val readLimit = minOf(length.toLong(), maxBytes - readBytes).toInt()
+        val read = delegate.read(buffer, offset, readLimit)
+        if (read > 0) {
+            readBytes += read.toLong()
+        }
+        return read
+    }
+
+    override fun close() {
+        delegate.close()
+    }
 }

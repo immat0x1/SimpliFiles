@@ -129,6 +129,16 @@ class SimpliDirectory internal constructor(
         return SimpliFile(target)
     }
 
+    fun zipTo(
+        target: Path,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(
+        target,
+        ArchiveSaveOptions.builder()
+            .overwritePolicy(overwritePolicy)
+            .build(),
+    )
+
     fun zipTo(target: String): SimpliFile = zipTo(Paths.get(target))
 
     fun zipTo(
@@ -136,12 +146,22 @@ class SimpliDirectory internal constructor(
         options: ArchiveSaveOptions,
     ): SimpliFile = zipTo(Paths.get(target), options)
 
+    fun zipTo(
+        target: String,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(Paths.get(target), overwritePolicy)
+
     fun zipTo(target: File): SimpliFile = zipTo(Paths.get(target.path))
 
     fun zipTo(
         target: File,
         options: ArchiveSaveOptions,
     ): SimpliFile = zipTo(Paths.get(target.path), options)
+
+    fun zipTo(
+        target: File,
+        overwritePolicy: OverwritePolicy,
+    ): SimpliFile = zipTo(Paths.get(target.path), overwritePolicy)
 
     fun copyTo(target: Path): SimpliDirectory = copyTo(target, OverwritePolicy.REPLACE)
 

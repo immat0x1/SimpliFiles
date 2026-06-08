@@ -63,6 +63,22 @@ class ArchivePackTest {
     }
 
     @Test
+    fun `pack supports overwrite policy shortcut`() {
+        val source = tempDir.resolve("notes.txt")
+        Files.write(source, "notes".toByteArray())
+        val output = tempDir.resolve("bundle.zip")
+        Files.write(output, "old".toByteArray())
+
+        SimpliFiles.pack()
+            .addFile(source, "docs/notes.txt")
+            .zipTo(output, OverwritePolicy.REPLACE)
+
+        ZipFile(output.toFile()).use { zip ->
+            assertEquals("notes", zip.readText("docs/notes.txt"))
+        }
+    }
+
+    @Test
     fun `pack rejects unsafe entry paths`() {
         val source = tempDir.resolve("notes.txt")
         Files.write(source, "notes".toByteArray())

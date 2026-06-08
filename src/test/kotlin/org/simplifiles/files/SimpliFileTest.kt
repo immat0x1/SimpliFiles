@@ -3,6 +3,7 @@ package org.simplifiles.files
 import org.junit.jupiter.api.io.TempDir
 import org.simplifiles.SimpliFiles
 import org.simplifiles.exception.FileOperationException
+import java.io.ByteArrayInputStream
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.test.Test
@@ -78,6 +79,57 @@ class SimpliFileTest {
         }
 
         assertEquals("second", text)
+    }
+
+    @Test
+    fun `file can write from input streams`() {
+        val file = SimpliFiles.file(tempDir.resolve("streams/output.txt"))
+
+        val written = file.writeFrom(ByteArrayInputStream("payload".toByteArray()))
+
+        assertEquals(file.path, written.path)
+        assertEquals("payload", file.readText())
+    }
+
+    @Test
+    fun `file stream writes enforce byte limits`() {
+        val file = SimpliFiles.file(tempDir.resolve("streams/limited.txt"))
+        file.writeText("old")
+
+        assertFailsWith<FileOperationException> {
+            file.writeFromAtomic(ByteArrayInputStream("payload".toByteArray()), maxBytes = 3)
+        }
+
+        assertEquals("old", file.readText())
+    }
+
+    @Test
+    fun `file can touch marker files`() {
+        val file = SimpliFiles.file(tempDir.resolve("markers/.ready"))
+
+        val touched = file.touch()
+
+        assertEquals(file.path, touched.path)
+        assertTrue(file.exists)
+        assertEquals(0, file.size)
+    }
+
+    @Test
+    fun `file can read bounded lines`() {
+        val file = SimpliFiles.file(tempDir.resolve("metadata.txt"))
+        file.writeText("name: demo\nversion: 1\n")
+
+        assertEquals(listOf("name: demo", "version: 1"), file.readLines(maxBytes = 32))
+
+        val lines = mutableListOf<String>()
+        file.forEachLine(maxBytes = 32) { line ->
+            lines += line
+        }
+        assertEquals(listOf("name: demo", "version: 1"), lines)
+
+        assertFailsWith<FileOperationException> {
+            file.readLines(maxBytes = 4)
+        }
     }
 
     @Test
