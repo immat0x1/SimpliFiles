@@ -130,4 +130,11 @@ class ArchiveFile internal constructor(
             absolutePath = target,
         )
     }
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is ArchiveFile && root == other.root && absolutePath == other.absolutePath)
+
+    override fun hashCode(): Int = 31 * root.hashCode() + absolutePath.hashCode()
+
+    override fun toString(): String = "ArchiveFile(path=$path, absolutePath=$absolutePath)"
 }

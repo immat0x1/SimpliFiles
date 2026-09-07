@@ -16,6 +16,7 @@ public final class org/simplifiles/archive/ArchiveDirectory {
 	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveDirectory;
 	public final fun create ()Lorg/simplifiles/archive/ArchiveDirectory;
 	public final fun deleteRecursively ()Z
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun exists ()Z
 	public final fun getAbsolutePath ()Ljava/nio/file/Path;
 	public final fun getDirectories ()Ljava/util/List;
@@ -23,8 +24,10 @@ public final class org/simplifiles/archive/ArchiveDirectory {
 	public final fun getFile ()Ljava/io/File;
 	public final fun getFiles ()Ljava/util/List;
 	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
 	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveDirectory;
 	public final fun toFile ()Ljava/io/File;
+	public fun toString ()Ljava/lang/String;
 	public final fun walkFiles ()Ljava/util/List;
 }
 
@@ -87,6 +90,7 @@ public final class org/simplifiles/archive/ArchiveExtractionOptions {
 	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveProgressListener;
 	public final fun getTargetPolicy ()Lorg/simplifiles/archive/ExtractionTargetPolicy;
 	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveExtractionOptions$Builder;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/simplifiles/archive/ArchiveExtractionOptions$Builder {
@@ -129,6 +133,7 @@ public final class org/simplifiles/archive/ArchiveFile {
 	public static synthetic fun appendText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
 	public final fun copyTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFile;
 	public final fun delete ()Z
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun exists ()Z
 	public final fun getAbsolutePath ()Ljava/nio/file/Path;
 	public final fun getExists ()Z
@@ -136,6 +141,7 @@ public final class org/simplifiles/archive/ArchiveFile {
 	public final fun getFile ()Ljava/io/File;
 	public final fun getPath ()Ljava/lang/String;
 	public final fun getSize ()J
+	public fun hashCode ()I
 	public final fun inputStream ()Ljava/io/InputStream;
 	public final fun moveTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveFile;
 	public final fun readBytes ()[B
@@ -143,6 +149,7 @@ public final class org/simplifiles/archive/ArchiveFile {
 	public final fun readText (Ljava/nio/charset/Charset;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun toFile ()Ljava/io/File;
+	public fun toString ()Ljava/lang/String;
 	public final fun writeText (Ljava/lang/String;)V
 	public final fun writeText (Ljava/lang/String;Ljava/nio/charset/Charset;)V
 	public static synthetic fun writeText$default (Lorg/simplifiles/archive/ArchiveFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
@@ -295,6 +302,7 @@ public final class org/simplifiles/archive/ArchiveSaveOptions {
 	public static final field DEFAULT_BUFFER_SIZE I
 	public static final field DEFAULT_COMPRESSION_LEVEL I
 	public static final field NO_COMPRESSION_LEVEL I
+	public static final field PRESERVE_SOURCE_TIMESTAMP J
 	public fun <init> ()V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;)V
@@ -302,16 +310,21 @@ public final class org/simplifiles/archive/ArchiveSaveOptions {
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;I)V
 	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;)V
-	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;Lorg/simplifiles/files/SymlinkPolicy;)V
+	public fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;Lorg/simplifiles/files/SymlinkPolicy;J)V
+	public synthetic fun <init> (Lorg/simplifiles/archive/ArchiveSaveProgressListener;Lorg/simplifiles/archive/CancellationToken;ILorg/simplifiles/files/OverwritePolicy;ILorg/simplifiles/archive/ArchiveEntryFilter;Lorg/simplifiles/files/SymlinkPolicy;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun builder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public static final fun defaults ()Lorg/simplifiles/archive/ArchiveSaveOptions;
 	public final fun getBufferSize ()I
 	public final fun getCancellationToken ()Lorg/simplifiles/archive/CancellationToken;
 	public final fun getCompressionLevel ()I
 	public final fun getEntryFilter ()Lorg/simplifiles/archive/ArchiveEntryFilter;
+	public final fun getEntryTimestamp ()J
 	public final fun getOverwritePolicy ()Lorg/simplifiles/files/OverwritePolicy;
 	public final fun getProgressListener ()Lorg/simplifiles/archive/ArchiveSaveProgressListener;
+	public final fun getSymlinkPolicy ()Lorg/simplifiles/files/SymlinkPolicy;
 	public final fun toBuilder ()Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/simplifiles/archive/ArchiveSaveOptions$Builder {
@@ -321,8 +334,10 @@ public final class org/simplifiles/archive/ArchiveSaveOptions$Builder {
 	public final fun cancellationToken (Lorg/simplifiles/archive/CancellationToken;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun compressionLevel (I)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun entryFilter (Lorg/simplifiles/archive/ArchiveEntryFilter;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun entryTimestamp (J)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun overwritePolicy (Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 	public final fun progressListener (Lorg/simplifiles/archive/ArchiveSaveProgressListener;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
+	public final fun symlinkPolicy (Lorg/simplifiles/files/SymlinkPolicy;)Lorg/simplifiles/archive/ArchiveSaveOptions$Builder;
 }
 
 public final class org/simplifiles/archive/ArchiveSaveOptions$Companion {
@@ -361,6 +376,7 @@ public abstract interface class org/simplifiles/archive/ArchiveSaveProgressListe
 }
 
 public final class org/simplifiles/archive/ArchiveSource {
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun extractTo (Ljava/io/File;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun extractTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun extractTo (Ljava/lang/String;)Lorg/simplifiles/archive/ExtractedArchive;
@@ -377,10 +393,12 @@ public final class org/simplifiles/archive/ArchiveSource {
 	public final fun extractToTemp (Lorg/simplifiles/archive/ArchiveExtractionOptions;)Lorg/simplifiles/archive/ExtractedArchive;
 	public final fun getPath ()Ljava/nio/file/Path;
 	public final fun getPolicy ()Lorg/simplifiles/archive/security/SecurityPolicy;
+	public fun hashCode ()I
 	public final fun inspect ()Lorg/simplifiles/archive/ArchiveInspection;
 	public final fun planExtractionTo (Ljava/io/File;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
 	public final fun planExtractionTo (Ljava/lang/String;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
 	public final fun planExtractionTo (Ljava/nio/file/Path;)Lorg/simplifiles/archive/ArchiveExtractionPlan;
+	public fun toString ()Ljava/lang/String;
 	public final fun validate ()Lorg/simplifiles/archive/ValidationReport;
 	public final fun withPolicy (Lorg/simplifiles/archive/security/SecurityPolicy;)Lorg/simplifiles/archive/ArchiveSource;
 }
@@ -575,13 +593,16 @@ public final class org/simplifiles/files/DirectoryTransferOptions {
 	public fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;)V
 	public fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;J)V
 	public fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;JJ)V
-	public synthetic fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;JJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;JJLorg/simplifiles/files/SymlinkPolicy;)V
+	public synthetic fun <init> (Lorg/simplifiles/files/DirectoryOverwritePolicy;JJLorg/simplifiles/files/SymlinkPolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun builder ()Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
 	public static final fun defaults ()Lorg/simplifiles/files/DirectoryTransferOptions;
 	public final fun getMaxBytes ()J
 	public final fun getMaxFiles ()J
 	public final fun getOverwritePolicy ()Lorg/simplifiles/files/DirectoryOverwritePolicy;
+	public final fun getSymlinkPolicy ()Lorg/simplifiles/files/SymlinkPolicy;
 	public final fun toBuilder ()Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/simplifiles/files/DirectoryTransferOptions$Builder {
@@ -590,6 +611,7 @@ public final class org/simplifiles/files/DirectoryTransferOptions$Builder {
 	public final fun maxBytes (J)Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
 	public final fun maxFiles (J)Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
 	public final fun overwritePolicy (Lorg/simplifiles/files/DirectoryOverwritePolicy;)Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
+	public final fun symlinkPolicy (Lorg/simplifiles/files/SymlinkPolicy;)Lorg/simplifiles/files/DirectoryTransferOptions$Builder;
 }
 
 public final class org/simplifiles/files/DirectoryTransferOptions$Companion {
@@ -621,6 +643,7 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun create ()Lorg/simplifiles/files/SimpliDirectory;
 	public final fun deleteRecursively ()Z
 	public final fun directory (Ljava/lang/String;)Lorg/simplifiles/files/SimpliDirectory;
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun exists ()Z
 	public final fun file (Ljava/lang/String;)Lorg/simplifiles/files/SimpliFile;
 	public final fun getDirectories ()Ljava/util/List;
@@ -628,6 +651,7 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun getFile ()Ljava/io/File;
 	public final fun getFiles ()Ljava/util/List;
 	public final fun getPath ()Ljava/nio/file/Path;
+	public fun hashCode ()I
 	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun moveTo (Ljava/io/File;Lorg/simplifiles/files/DirectoryTransferOptions;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun moveTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
@@ -639,6 +663,7 @@ public final class org/simplifiles/files/SimpliDirectory {
 	public final fun moveTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliDirectory;
 	public final fun resolveInside (Ljava/lang/String;)Ljava/nio/file/Path;
 	public final fun toFile ()Ljava/io/File;
+	public fun toString ()Ljava/lang/String;
 	public final fun walkFiles ()Ljava/util/List;
 	public final fun zipTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public final fun zipTo (Ljava/io/File;Lorg/simplifiles/archive/ArchiveSaveOptions;)Lorg/simplifiles/files/SimpliFile;
@@ -662,6 +687,7 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun copyTo (Ljava/nio/file/Path;)Lorg/simplifiles/files/SimpliFile;
 	public final fun copyTo (Ljava/nio/file/Path;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
 	public final fun delete ()Z
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun exists ()Z
 	public final fun forEachLine (JLjava/nio/charset/Charset;Lkotlin/jvm/functions/Function1;)V
 	public final fun forEachLine (JLkotlin/jvm/functions/Function1;)V
@@ -671,6 +697,7 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun getFile ()Ljava/io/File;
 	public final fun getPath ()Ljava/nio/file/Path;
 	public final fun getSize ()J
+	public fun hashCode ()I
 	public final fun inputStream ()Ljava/io/InputStream;
 	public final fun moveTo (Ljava/io/File;)Lorg/simplifiles/files/SimpliFile;
 	public final fun moveTo (Ljava/io/File;Lorg/simplifiles/files/OverwritePolicy;)Lorg/simplifiles/files/SimpliFile;
@@ -691,6 +718,7 @@ public final class org/simplifiles/files/SimpliFile {
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;JLjava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public static synthetic fun readText$default (Lorg/simplifiles/files/SimpliFile;Ljava/nio/charset/Charset;ILjava/lang/Object;)Ljava/lang/String;
 	public final fun toFile ()Ljava/io/File;
+	public fun toString ()Ljava/lang/String;
 	public final fun touch ()Lorg/simplifiles/files/SimpliFile;
 	public final fun writeBytes ([B)V
 	public final fun writeBytesAtomic ([B)V
@@ -706,5 +734,14 @@ public final class org/simplifiles/files/SimpliFile {
 	public final fun writeTextAtomic (Ljava/lang/String;)V
 	public final fun writeTextAtomic (Ljava/lang/String;Ljava/nio/charset/Charset;)V
 	public static synthetic fun writeTextAtomic$default (Lorg/simplifiles/files/SimpliFile;Ljava/lang/String;Ljava/nio/charset/Charset;ILjava/lang/Object;)V
+}
+
+public final class org/simplifiles/files/SymlinkPolicy : java/lang/Enum {
+	public static final field ERROR Lorg/simplifiles/files/SymlinkPolicy;
+	public static final field FOLLOW Lorg/simplifiles/files/SymlinkPolicy;
+	public static final field SKIP Lorg/simplifiles/files/SymlinkPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/simplifiles/files/SymlinkPolicy;
+	public static fun values ()[Lorg/simplifiles/files/SymlinkPolicy;
 }
 

@@ -17,6 +17,7 @@ internal object FileTreeCopier {
 
         Files.walk(source).use { stream ->
             stream.asSequence()
+                .filter { included(it, options) }
                 .filter { Files.isRegularFile(it) }
                 .forEach { file ->
                     fileCount += 1
@@ -41,6 +42,7 @@ internal object FileTreeCopier {
 
         Files.walk(source).use { stream ->
             stream.asSequence()
+                .filter { included(it, options) }
                 .sortedBy { it.nameCount }
                 .forEach { current ->
                     val relative = source.relativize(current)
@@ -61,4 +63,14 @@ internal object FileTreeCopier {
                 }
         }
     }
+
+    private fun included(
+        path: Path,
+        options: DirectoryTransferOptions,
+    ): Boolean =
+        when (SymlinkSupport.decide(path, options.symlinkPolicy)) {
+            SymlinkDecision.INCLUDE -> true
+            SymlinkDecision.SKIP -> false
+            SymlinkDecision.FAIL -> throw FileOperationException("Directory contains a symbolic link: $path")
+        }
 }

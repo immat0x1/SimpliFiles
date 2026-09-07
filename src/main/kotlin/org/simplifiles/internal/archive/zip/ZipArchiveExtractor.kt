@@ -17,6 +17,7 @@ import org.simplifiles.exception.ExtractionTargetException
 import org.simplifiles.internal.archive.ArchivePathAnalyzer
 import org.simplifiles.internal.archive.ArchivePathResolver
 import org.simplifiles.internal.io.FileTreeCleaner
+import org.simplifiles.internal.saturatingPlus
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
@@ -253,13 +254,7 @@ internal object ZipArchiveExtractor {
             .filterNot { it.isDirectory }
             .map { it.uncompressedSize }
             .filter { it > 0 }
-            .fold(0L) { total, size ->
-                if (Long.MAX_VALUE - total < size) {
-                    Long.MAX_VALUE
-                } else {
-                    total + size
-                }
-            }
+            .fold(0L, ::saturatingPlus)
 
     private fun checkedAddEntry(
         current: Long,

@@ -335,6 +335,13 @@ class SimpliFile internal constructor(
             written += read.toLong()
         }
     }
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is SimpliFile && path == other.path)
+
+    override fun hashCode(): Int = path.hashCode()
+
+    override fun toString(): String = "SimpliFile(path=$path)"
 }
 
 private const val DEFAULT_FILE_BUFFER_SIZE: Int = 64 * 1024

@@ -4,14 +4,44 @@ package org.simplifiles.archive.security
  * Security limits applied during archive validation and extraction.
  *
  * The default strict policy is intended for untrusted archives.
+ *
+ * [maxEntries], [maxTotalUncompressedSize], [maxSingleFileSize], [maxCompressionRatio],
+ * [allowAbsolutePaths], and [duplicatePolicy] are enforced during validation and again while
+ * bytes are written.
+ *
+ * [maxNestedArchiveDepth], [allowSymlinks], and [allowHardlinks] are reserved. Their default
+ * values describe what SimpliFiles already does, but raising them has no effect yet. See the
+ * documentation on each one.
  */
 data class SecurityPolicy @JvmOverloads constructor(
     val maxEntries: Long = 10_000,
     val maxTotalUncompressedSize: Long = 1_000_000_000,
     val maxSingleFileSize: Long = 100_000_000,
     val maxCompressionRatio: Double = 100.0,
+    /**
+     * Reserved, not enforced yet.
+     *
+     * SimpliFiles never extracts archives found inside an archive, so the default `0` already
+     * holds. A larger value does not enable nested extraction.
+     */
     val maxNestedArchiveDepth: Int = 0,
+    /**
+     * Reserved, not enforced yet.
+     *
+     * ZIP extraction only ever writes regular files, so the default `false` already holds.
+     * Setting `true` does not make extraction recreate symbolic links, because
+     * `java.util.zip.ZipEntry` does not expose the external attributes that mark them.
+     *
+     * This is unrelated to writing archives: see `SymlinkPolicy` for how links in a source
+     * tree are handled by `zipTo` and directory copies.
+     */
     val allowSymlinks: Boolean = false,
+    /**
+     * Reserved, not enforced yet.
+     *
+     * ZIP extraction only ever writes regular files, so the default `false` already holds.
+     * Setting `true` does not make extraction recreate hard links.
+     */
     val allowHardlinks: Boolean = false,
     val allowAbsolutePaths: Boolean = false,
     val duplicatePolicy: DuplicatePolicy = DuplicatePolicy.ERROR,
@@ -75,14 +105,23 @@ data class SecurityPolicy @JvmOverloads constructor(
             maxCompressionRatio = value
         }
 
+        /**
+         * Reserved, not enforced yet. See [SecurityPolicy.maxNestedArchiveDepth].
+         */
         fun maxNestedArchiveDepth(value: Int): Builder = apply {
             maxNestedArchiveDepth = value
         }
 
+        /**
+         * Reserved, not enforced yet. See [SecurityPolicy.allowSymlinks].
+         */
         fun allowSymlinks(value: Boolean): Builder = apply {
             allowSymlinks = value
         }
 
+        /**
+         * Reserved, not enforced yet. See [SecurityPolicy.allowHardlinks].
+         */
         fun allowHardlinks(value: Boolean): Builder = apply {
             allowHardlinks = value
         }

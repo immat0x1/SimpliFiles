@@ -1,6 +1,7 @@
 package org.simplifiles.archive
 
 import org.simplifiles.archive.security.SecurityPolicy
+import org.simplifiles.exception.ArchiveOperationException
 import org.simplifiles.exception.ArchiveValidationException
 import org.simplifiles.exception.CorruptedArchiveException
 import org.simplifiles.exception.UnsupportedArchiveFormatException
@@ -12,6 +13,7 @@ import org.simplifiles.internal.archive.zip.ZipArchiveExtractor
 import org.simplifiles.internal.archive.zip.ZipArchiveReader
 import org.simplifiles.internal.io.FileTreeCleaner
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -34,10 +36,13 @@ class ArchiveSource internal constructor(
     /**
      * Reads archive metadata without extracting files.
      *
+     * @throws ArchiveOperationException when the path is missing or is not a regular file.
      * @throws UnsupportedArchiveFormatException when the format is not supported.
      * @throws CorruptedArchiveException when the archive looks supported but cannot be read.
      */
     fun inspect(): ArchiveInspection {
+        ensureReadableFile()
+
         val format = ArchiveFormatDetector.detect(path)
             ?: throw UnsupportedArchiveFormatException(path)
 
@@ -53,16 +58,21 @@ class ArchiveSource internal constructor(
      * or corrupted archives.
      */
     fun validate(): ValidationReport {
-        val format = ArchiveFormatDetector.detect(path)
-            ?: return ValidationReport(
-                issues = listOf(
-                    ArchiveIssue(
-                        severity = ArchiveIssueSeverity.BLOCKER,
-                        code = "archive.format.unsupported",
-                        message = "Unsupported archive format.",
-                    ),
-                ),
+        unreadableFileReason()?.let { reason ->
+            return blockerReport(code = "archive.unreadable", message = reason)
+        }
+
+        val format = try {
+            ArchiveFormatDetector.detect(path)
+        } catch (exception: IOException) {
+            return blockerReport(
+                code = "archive.unreadable",
+                message = exception.message ?: "Archive cannot be read.",
             )
+        } ?: return blockerReport(
+            code = "archive.format.unsupported",
+            message = "Unsupported archive format.",
+        )
 
         val inspection = try {
             when (format) {
@@ -221,4 +231,39 @@ class ArchiveSource internal constructor(
             throw org.simplifiles.exception.ArchiveOperationCanceledException()
         }
     }
+
+    /**
+     * Returns why this path cannot be read as an archive, or null when it can be.
+     */
+    private fun unreadableFileReason(): String? = when {
+        !Files.exists(path) -> "Archive file does not exist."
+        !Files.isRegularFile(path) -> "Archive path is not a regular file."
+        else -> null
+    }
+
+    private fun ensureReadableFile() {
+        unreadableFileReason()?.let { reason ->
+            throw ArchiveOperationException("$reason Path: $path")
+        }
+    }
+
+    private fun blockerReport(
+        code: String,
+        message: String,
+    ): ValidationReport = ValidationReport(
+        issues = listOf(
+            ArchiveIssue(
+                severity = ArchiveIssueSeverity.BLOCKER,
+                code = code,
+                message = message,
+            ),
+        ),
+    )
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is ArchiveSource && path == other.path && policy == other.policy)
+
+    override fun hashCode(): Int = 31 * path.hashCode() + policy.hashCode()
+
+    override fun toString(): String = "ArchiveSource(path=$path, policy=$policy)"
 }

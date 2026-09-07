@@ -6,6 +6,9 @@ import org.simplifiles.archive.ArchivePackEntry
 import org.simplifiles.exception.ArchiveOperationCanceledException
 import org.simplifiles.exception.ArchiveWriteException
 import org.simplifiles.files.OverwritePolicy
+import org.simplifiles.internal.io.SymlinkDecision
+import org.simplifiles.internal.io.SymlinkSupport
+import org.simplifiles.internal.saturatingPlus
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
@@ -66,8 +69,8 @@ internal object ZipArchiveWriter {
                 newOutputStream(writePath, replacingExisting),
             ).use { zip ->
                 zip.setLevel(options.compressionLevel)
-                writeDirectories(zip, normalizedRoot, directories, progress)
-                writeFiles(zip, normalizedRoot, files, progress, options.bufferSize)
+                writeDirectories(zip, normalizedRoot, directories, progress, options)
+                writeFiles(zip, normalizedRoot, files, progress, options)
             }
             if (writePath != normalizedOutput) {
                 Files.move(writePath, normalizedOutput, StandardCopyOption.REPLACE_EXISTING)
@@ -112,13 +115,7 @@ internal object ZipArchiveWriter {
             options = options,
             totalEntries = plannedEntries.size.toLong(),
             totalBytes = plannedEntries.fold(0L) { total, entry ->
-                if (entry.isDirectory) {
-                    total
-                } else if (Long.MAX_VALUE - total < entry.size) {
-                    Long.MAX_VALUE
-                } else {
-                    total + entry.size
-                }
+                if (entry.isDirectory) total else saturatingPlus(total, entry.size)
             },
         )
 
@@ -130,7 +127,7 @@ internal object ZipArchiveWriter {
                 zip.setLevel(options.compressionLevel)
                 for (entry in plannedEntries) {
                     progress.checkCanceled()
-                    zip.putNextEntry(ZipEntry(entry.archivePath))
+                    zip.putNextEntry(timestampedEntry(entry.archivePath, entry.source, options))
                     if (!entry.isDirectory) {
                         Files.newInputStream(entry.source).use { input ->
                             copy(input, zip, options.bufferSize, progress, entry.archivePath)
@@ -224,6 +221,7 @@ internal object ZipArchiveWriter {
     ) {
         Files.walk(source).use { stream ->
             stream.asSequence()
+                .filter { included(it, options) }
                 .sortedBy { source.relativize(it).toString() }
                 .forEach { current ->
                     val archivePath = packArchivePath(
@@ -317,11 +315,12 @@ internal object ZipArchiveWriter {
         normalizedRoot: Path,
         directories: List<Path>,
         progress: SaveProgress,
+        options: ArchiveSaveOptions,
     ) {
         for (directory in directories) {
             progress.checkCanceled()
             val archivePath = normalizedRoot.relativize(directory).toString().replace('\\', '/') + "/"
-            zip.putNextEntry(ZipEntry(archivePath))
+            zip.putNextEntry(timestampedEntry(archivePath, directory, options))
             zip.closeEntry()
             progress.entryCompleted(archivePath)
         }
@@ -332,18 +331,37 @@ internal object ZipArchiveWriter {
         normalizedRoot: Path,
         files: List<Path>,
         progress: SaveProgress,
-        bufferSize: Int,
+        options: ArchiveSaveOptions,
     ) {
         for (file in files) {
             progress.checkCanceled()
             val archivePath = normalizedRoot.relativize(file).toString().replace('\\', '/')
-            zip.putNextEntry(ZipEntry(archivePath))
+            zip.putNextEntry(timestampedEntry(archivePath, file, options))
             Files.newInputStream(file).use { input ->
-                copy(input, zip, bufferSize, progress, archivePath)
+                copy(input, zip, options.bufferSize, progress, archivePath)
             }
             zip.closeEntry()
             progress.entryCompleted(archivePath)
         }
+    }
+
+    /**
+     * Builds a ZIP entry whose modification time comes from [source], or from a fixed
+     * [ArchiveSaveOptions.entryTimestamp] when one is configured.
+     */
+    private fun timestampedEntry(
+        archivePath: String,
+        source: Path,
+        options: ArchiveSaveOptions,
+    ): ZipEntry {
+        val entry = ZipEntry(archivePath)
+        val timestamp = if (options.entryTimestamp == ArchiveSaveOptions.PRESERVE_SOURCE_TIMESTAMP) {
+            Files.getLastModifiedTime(source).toMillis()
+        } else {
+            options.entryTimestamp
+        }
+        entry.time = timestamp
+        return entry
     }
 
     private fun listDirectories(
@@ -352,6 +370,7 @@ internal object ZipArchiveWriter {
     ): List<Path> =
         Files.walk(normalizedRoot).use { stream ->
             stream.asSequence()
+                .filter { included(it, options) }
                 .filter { it != normalizedRoot && Files.isDirectory(it) }
                 .filter { options.entryFilter.include(entryPath(normalizedRoot, it) + "/") }
                 .sortedBy { normalizedRoot.relativize(it).toString() }
@@ -364,10 +383,24 @@ internal object ZipArchiveWriter {
     ): List<Path> =
         Files.walk(normalizedRoot).use { stream ->
             stream.asSequence()
+                .filter { included(it, options) }
                 .filter { Files.isRegularFile(it) }
                 .filter { options.entryFilter.include(entryPath(normalizedRoot, it)) }
                 .sortedBy { normalizedRoot.relativize(it).toString() }
                 .toList()
+        }
+
+    /**
+     * Decides whether a walked path may be archived under the configured symlink policy.
+     */
+    private fun included(
+        path: Path,
+        options: ArchiveSaveOptions,
+    ): Boolean =
+        when (SymlinkSupport.decide(path, options.symlinkPolicy)) {
+            SymlinkDecision.INCLUDE -> true
+            SymlinkDecision.SKIP -> false
+            SymlinkDecision.FAIL -> throw ArchiveWriteException(path, "source tree contains a symbolic link")
         }
 
     private fun entryPath(
@@ -395,14 +428,7 @@ internal object ZipArchiveWriter {
     }
 
     private fun totalFileSize(files: List<Path>): Long =
-        files.fold(0L) { total, file ->
-            val size = Files.size(file)
-            if (Long.MAX_VALUE - total < size) {
-                Long.MAX_VALUE
-            } else {
-                total + size
-            }
-        }
+        files.fold(0L) { total, file -> saturatingPlus(total, Files.size(file)) }
 
     private fun checkCanceled(options: ArchiveSaveOptions) {
         if (options.cancellationToken.isCancellationRequested()) {

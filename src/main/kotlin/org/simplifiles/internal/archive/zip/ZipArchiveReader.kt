@@ -5,8 +5,8 @@ import org.simplifiles.archive.ArchiveFormat
 import org.simplifiles.archive.ArchiveInspection
 import org.simplifiles.exception.CorruptedArchiveException
 import org.simplifiles.internal.archive.ArchivePathAnalyzer
+import java.io.IOException
 import java.nio.file.Path
-import java.util.zip.ZipException
 import java.util.zip.ZipFile
 
 internal object ZipArchiveReader {
@@ -26,7 +26,7 @@ internal object ZipArchiveReader {
                     )
                 }.toList()
             }
-        } catch (exception: ZipException) {
+        } catch (exception: IOException) {
             throw CorruptedArchiveException(path, exception)
         }
 

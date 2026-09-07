@@ -314,4 +314,11 @@ class SimpliDirectory internal constructor(
         }
         return DirectoryTransferOptions(overwritePolicy = directoryPolicy)
     }
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is SimpliDirectory && path == other.path)
+
+    override fun hashCode(): Int = path.hashCode()
+
+    override fun toString(): String = "SimpliDirectory(path=$path)"
 }

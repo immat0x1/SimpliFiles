@@ -151,4 +151,11 @@ class ArchiveDirectory internal constructor(
             path = this@ArchiveDirectory.root.relativize(this).toString().replace('\\', '/'),
             absolutePath = this,
         )
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is ArchiveDirectory && root == other.root && absolutePath == other.absolutePath)
+
+    override fun hashCode(): Int = 31 * root.hashCode() + absolutePath.hashCode()
+
+    override fun toString(): String = "ArchiveDirectory(path=$path, absolutePath=$absolutePath)"
 }

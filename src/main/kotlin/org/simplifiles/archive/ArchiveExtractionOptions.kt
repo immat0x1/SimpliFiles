@@ -29,6 +29,10 @@ class ArchiveExtractionOptions @JvmOverloads constructor(
         fun builder(): Builder = Builder()
     }
 
+    override fun toString(): String =
+        "ArchiveExtractionOptions(bufferSize=$bufferSize, targetPolicy=$targetPolicy, " +
+            "hasProgressListener=${progressListener != null})"
+
     /**
      * Creates a builder initialized with this options object's values.
      */

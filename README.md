@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/immat0x1/SimpliFiles/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/immat0x1/SimpliFiles/ci.yml?branch=main&style=flat-square"></a>
-  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Snapshot" src="https://img.shields.io/badge/snapshot-0.1.5--SNAPSHOT-1684ff?style=flat-square"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.immat0x1/simplifiles"><img alt="Maven Central" src="https://img.shields.io/badge/Maven%20Central-0.1.6-1684ff?style=flat-square"></a>
   <img alt="Java" src="https://img.shields.io/badge/Java-17%2B-f89820?style=flat-square">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-JVM-7f52ff?style=flat-square">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-Apache--2.0-green?style=flat-square"></a>
@@ -18,7 +18,13 @@
 
 ## Installation
 
-Snapshot builds are available from Maven Central Snapshots:
+```kotlin
+dependencies {
+    implementation("io.github.immat0x1:simplifiles:0.1.6")
+}
+```
+
+Snapshot builds of in-progress work are available from Maven Central Snapshots:
 
 ```kotlin
 repositories {
@@ -29,16 +35,6 @@ repositories {
         }
     }
 }
-
-dependencies {
-    implementation("io.github.immat0x1:simplifiles:0.1.5-SNAPSHOT")
-}
-```
-
-Latest stable coordinate:
-
-```kotlin
-implementation("io.github.immat0x1:simplifiles:0.1.3")
 ```
 
 ## Requirements
@@ -47,6 +43,36 @@ implementation("io.github.immat0x1:simplifiles:0.1.3")
 - Build: Java 17 toolchain
 - Kotlin/JVM
 - Archive module currently supports ZIP
+- Android: API 26+, or API 21+ with nio desugaring (see below)
+
+### Android
+
+SimpliFiles is built on `java.nio.file`, which Android ships only from **API 26 (Android 8.0)**. On
+older devices those classes are absent at runtime, so any call fails with `NoClassDefFoundError`
+regardless of the Java language level you compile against.
+
+To support devices below API 26, enable core library desugaring with the **nio** variant. The
+default `desugar_jdk_libs` artifact does not include `java.nio`:
+
+```kotlin
+android {
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.5")
+}
+```
+
+This requires Android Gradle Plugin 7.4.0 or newer. Below API 26 the emulation is partial, and two
+gaps affect SimpliFiles:
+
+- `StandardCopyOption.ATOMIC_MOVE` degrades to a plain rename, so `writeTextAtomic` and
+  `writeFromAtomic` give a weaker guarantee than on API 26+.
+- A missing file may surface as `FileNotFoundException` instead of `NoSuchFileException`. Catch
+  `IOException` if you need to handle both.
 
 ## Why SimpliFiles
 
@@ -208,6 +234,19 @@ val archive = SimpliFiles.pack()
     .zipTo("bundle.zip")
 ```
 
+### Reproducible Archives
+
+Entries keep the modification time of their source file. Set a fixed `entryTimestamp` when the same
+input tree must always produce the same archive bytes.
+
+```kotlin
+val options = ArchiveSaveOptions.builder()
+    .entryTimestamp(0L)
+    .build()
+
+SimpliFiles.directory("dist").zipTo("dist.zip", options)
+```
+
 ### Safe Child Paths
 
 `resolveInside` rejects absolute paths and parent traversal before returning a normalized path inside the directory root.
@@ -266,6 +305,36 @@ Use `clean()` when a workspace directory should stay in place, but all of its co
 SimpliFiles.directory("build/tmp")
     .clean()
 ```
+
+### Symbolic Links
+
+A symbolic link can point outside the tree being processed. Following one copies the target's
+content into the destination as a regular file, which moves data across a trust boundary without
+the caller noticing. SimpliFiles therefore **skips symbolic links by default** when it walks a
+directory tree for `zipTo(...)`, `pack().addDirectory(...)`, `copyTo(...)`, and `moveTo(...)`.
+
+```kotlin
+import org.simplifiles.files.SymlinkPolicy
+
+// Fail instead of skipping.
+SimpliFiles.directory("assets").copyTo(
+    "build/assets",
+    DirectoryTransferOptions.builder()
+        .symlinkPolicy(SymlinkPolicy.ERROR)
+        .build(),
+)
+
+// Read through links, for trees you control.
+SimpliFiles.directory("assets").zipTo(
+    "assets.zip",
+    ArchiveSaveOptions.builder()
+        .symlinkPolicy(SymlinkPolicy.FOLLOW)
+        .build(),
+)
+```
+
+A file named directly through `pack().addFile(...)` is an explicit choice by the caller, so it is
+always archived, link or not.
 
 ## Archive Recipes
 
@@ -403,6 +472,9 @@ try (ExtractedArchive archive = SimpliFiles.archive("bundle.zip")
 - Configurable extraction buffer size
 - Save progress callbacks, cancellation tokens, and buffer size
 - Save overwrite policy, compression level, and entry filters
+- Symbolic links skipped by default when walking directory trees, with `SymlinkPolicy`
+- Source modification times preserved in ZIP entries, with a fixed-timestamp option for reproducible output
+- Value equality and readable `toString` on file, directory, and archive handles
 - Direct ZIP overwrite policy shortcuts
 - ZIP creation from independent files and directories with `SimpliFiles.pack()`
 - JMH benchmarks against direct Java ZIP baselines
@@ -426,7 +498,16 @@ It rejects or limits:
 - maximum single file size
 - maximum total uncompressed size
 
+Limits are checked during validation and again while bytes are written, so an archive that lies
+about its declared sizes is still stopped mid-extraction.
+
 Regular directory handles also reject child paths that escape their root.
+
+`SecurityPolicy.maxNestedArchiveDepth`, `allowSymlinks`, and `allowHardlinks` are **reserved**.
+Their defaults describe what SimpliFiles already does — it never extracts nested archives and never
+recreates links — but raising them has no effect yet, because `java.util.zip.ZipEntry` does not
+expose the external attributes that mark a link. These are unrelated to `SymlinkPolicy`, which
+controls links found in a source tree while *writing* an archive.
 
 ## Errors
 
@@ -446,8 +527,10 @@ Core exception types:
 ## Limitations
 
 - Archive module supports ZIP only
-- symlink and hardlink handling is not complete yet
+- Symbolic links are skipped, not stored, when writing archives; extraction never recreates links
+- `SecurityPolicy.allowSymlinks`, `allowHardlinks`, and `maxNestedArchiveDepth` are reserved and not enforced yet
 - benchmark coverage is basic
+- Android below API 26 needs nio desugaring, with the caveats listed under [Requirements](#android)
 
 ## License
 

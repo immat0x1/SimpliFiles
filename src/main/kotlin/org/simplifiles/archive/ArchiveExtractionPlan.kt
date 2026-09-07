@@ -1,5 +1,6 @@
 package org.simplifiles.archive
 
+import org.simplifiles.internal.saturatingPlus
 import java.nio.file.Path
 
 /**
@@ -17,11 +18,14 @@ data class ArchiveExtractionPlan(
     val totalEntries: Int
         get() = entries.size
 
+    /**
+     * Bytes the plan expects to write, saturating at [Long.MAX_VALUE] rather than wrapping.
+     */
     val totalBytesToWrite: Long
         get() = entries
             .asSequence()
             .filter { it.action.writesFile }
             .map { it.uncompressedSize }
             .filter { it > 0 }
-            .sum()
+            .fold(0L, ::saturatingPlus)
 }
